@@ -18,13 +18,16 @@ public class Channel {
 	private HashSet<Class<?>> messagesToListen = new HashSet<>();
 	private HashSet<Class<?>> messagesProduced = new HashSet<>();
 	private LinkedHashMap<String, Integer> periodicCalls = new LinkedHashMap<>();
+	private Class<?> agentClass;
 	
 	public Channel(Class<?> agentClass) {
-		Agent a = agentClass.getAnnotation(Agent.class);
-		
-		if (a != null) {
-			for (Class<? extends IMCMessage> m : a.publishes()) {
-				messagesProduced.add(m);
+		this.agentClass = agentClass;
+		for (Class<?> c = agentClass; c != Object.class; c = c.getSuperclass()) {
+			Agent a = c.getAnnotation(Agent.class);	
+			if (a != null) {
+				for (Class<? extends IMCMessage> m : a.publishes()) {
+					messagesProduced.add(m);					
+				}
 			}
 		}
 		
@@ -65,4 +68,16 @@ public class Channel {
 		methods.addAll(Arrays.asList(clazz.getDeclaredMethods()));
 		return methods;
 	}	
+	
+	@Override
+	public String toString() {
+		String s = agentClass.getSimpleName()+" in[ ";
+		for (Class<?> c : messagesToListen)
+			s += c.getSimpleName()+" ";
+		s += "]  out[ ";
+		for (Class<?> c : messagesProduced)
+			s += c.getSimpleName()+" ";
+		
+		return s+"]";
+	}
 }

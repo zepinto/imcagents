@@ -17,7 +17,7 @@ public class PeriodicCall implements Runnable {
 	
 	
 	public void run() {
-		this.thisTime = System.currentTimeMillis();
+		this.thisTime = AgentContext.instance().getTime();
 		this.nextTime = thisTime + period;
 		ref.tell(this, ActorRef.noSender());
 	}

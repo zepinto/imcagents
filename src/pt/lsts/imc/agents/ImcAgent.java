@@ -66,7 +66,7 @@ public class ImcAgent extends UntypedActor {
 		else if (msg instanceof PeriodicCall) {
 			PeriodicCall call = (PeriodicCall) msg;
 			// drop in case of delays
-			if (call.nextTime <= System.currentTimeMillis())
+			if (call.nextTime <= AgentContext.instance().getTime())
 				return;
 			try {
 				getClass().getMethod(call.method).invoke(this);
