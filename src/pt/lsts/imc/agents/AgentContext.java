@@ -20,34 +20,56 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
+import com.typesafe.config.ConfigFactory;
+
 public class AgentContext {
 
 	@Property
-	int src_id;
+	int src_id = 0;
+	
+	@Property
+	int local_port = 9000;
+	
+	@Property
+	int remote_port = -1;
+	
+	@Property
+	String remote_host = "localhost";
 	
 	private ActorRef bus;
 	private ActorSystem system;
 	
 	// real time is the default clock
 	//private Clock clock = new RTClock();
-	private Clock clock = new SimulationClock(10);
+	private Clock clock = new SimulationClock(1.0);
 
 	// Singleton
 	private static AgentContext instance = null;
-	private AgentContext() {
-		this.system = ActorSystem.create();
-		this.bus = system.actorOf(Props.create(MessageBus.class));
+	private AgentContext(File config) {
+		instance = this;
+		try {
+			parseConfig(config);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
-
+	
 	public static AgentContext instance() {
-		if (instance == null)
-			instance = new AgentContext();
 		return instance;
 	}
 	
 	public void parseConfig(File config) throws Exception {
 		Ini ini = new Ini(config);
-
+		Ini.Section sec = ini.get("AgentContext");
+		Properties properties = new Properties();
+		for (String option : sec.keySet())
+			properties.put(option, sec.fetch(option));
+		
+		PropertyUtils.setProperties(this, properties, false);
+		this.system = ActorSystem.create("IMCAgents", ConfigFactory.parseProperties(properties));
+		this.bus = system.actorOf(Props.create(MessageBus.class));
+		
 		for (Ini.Section section : ini.values()) {
 			String name = section.getName();
 			Properties props = new Properties();
@@ -61,14 +83,13 @@ public class AgentContext {
 				catch (Exception e) {
 					c = Class.forName("pt.lsts.imc.agents."+name);
 				}
-				bootstrap(c, props);
-			}
-			else {
-				PropertyUtils.setProperties(this, props, false);
-			}
+				//for (int i = 0; i < 100; i++)
+					bootstrap(c, props);
+			}			
 		}
 		
-		System.out.println(src_id);
+		
+		System.out.println(local_port);
 	}
 	
 	public ActorRef bootstrap(Class<?> c, Properties properties) {
@@ -114,7 +135,7 @@ public class AgentContext {
 	}
 
 	public static void main(String[] args) throws Exception {
-		AgentContext.instance().parseConfig(new File("/home/zp/Desktop/agents.props"));
+		new AgentContext(new File("/home/zp/Desktop/agents.props"));
 	}
 
 }

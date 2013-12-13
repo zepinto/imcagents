@@ -1,5 +1,7 @@
 package pt.lsts.imc.agents;
 
+import info.zepinto.props.Property;
+
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
@@ -7,13 +9,17 @@ import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
 public class MessageBus extends UntypedActor {
-
+	
 	private LinkedHashMap<ActorRef, Channel> channels = new LinkedHashMap<>();
 	private boolean sendToSelf = false;
 	
 	@Override
 	public void onReceive(Object arg0) throws Exception {
 
+		if (getSender().equals(getSelf())) {
+			return;
+		}
+		
 		// if the sender is unknown, it is either a new one or invalid
 		if (!channels.containsKey(getSender())) {
 			if (arg0.getClass().equals(Channel.class)) {

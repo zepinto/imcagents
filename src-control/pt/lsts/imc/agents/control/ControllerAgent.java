@@ -36,10 +36,11 @@ public abstract class ControllerAgent extends ImcAgent {
 	}
 	
 	public abstract Reference guide(EstimatedState estimatedState, FollowRefState followRefState);
-	
+
 	@Periodic(millisBetweenUpdates=1000)
 	public final void sendReference() {
 		Reference ref = guide(estimatedState, followRefState);
+		System.out.println(ref);
 		if (ref != null)
 			send(ref);
 		else {
