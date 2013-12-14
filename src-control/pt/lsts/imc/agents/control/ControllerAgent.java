@@ -2,6 +2,7 @@ package pt.lsts.imc.agents.control;
 
 import pt.lsts.imc.EstimatedState;
 import pt.lsts.imc.FollowRefState;
+import pt.lsts.imc.PathControlState;
 import pt.lsts.imc.PlanControl;
 import pt.lsts.imc.PlanControl.OP;
 import pt.lsts.imc.PlanControl.TYPE;
@@ -19,6 +20,7 @@ public abstract class ControllerAgent extends ImcAgent {
 	protected EstimatedState estimatedState = null;
 	protected FollowRefState followRefState = null;
 	protected PlanControlState planControlState = null;
+	protected PathControlState pathControlState = null;
 	
 	@Consume
 	protected final void on(EstimatedState estate) {
@@ -35,11 +37,17 @@ public abstract class ControllerAgent extends ImcAgent {
 		this.planControlState = planControlState;		
 	}
 	
-	public abstract Reference guide(EstimatedState estimatedState, FollowRefState followRefState);
+	@Consume
+	protected final void on(PathControlState pathControlState) {
+		this.pathControlState = pathControlState;		
+	}
+
+	
+	public abstract Reference guide();
 
 	@Periodic(millisBetweenUpdates=1000)
 	public final void sendReference() {
-		Reference ref = guide(estimatedState, followRefState);
+		Reference ref = guide();
 		System.out.println(ref);
 		if (ref != null)
 			send(ref);
