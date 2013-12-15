@@ -29,25 +29,28 @@ public class Channel {
 					messagesProduced.add(m);					
 				}
 			}
+			
+			for (Method m : getMethods(c)) {
+				Consume cons = m.getAnnotation(Consume.class);
+				Periodic p = m.getAnnotation(Periodic.class);
+				if (cons != null) {
+					Class<?>[] params = m.getParameterTypes();
+					if (params.length != 1)
+						continue;
+					
+					m.setAccessible(true);
+					messagesToListen.add(m.getParameterTypes()[0]);
+				}
+				if (p != null) {
+					if (m.getParameterTypes().length != 0)
+						continue;
+					periodicCalls.put(m.getName(), p.millisBetweenUpdates());
+				}
+			}
 		}
 		
-		for (Method m : getMethods(agentClass)) {
-			Consume c = m.getAnnotation(Consume.class);
-			Periodic p = m.getAnnotation(Periodic.class);
-			if (c != null) {
-				Class<?>[] params = m.getParameterTypes();
-				if (params.length != 1)
-					continue;
-				
-				m.setAccessible(true);
-				messagesToListen.add(m.getParameterTypes()[0]);
-			}
-			if (p != null) {
-				if (m.getParameterTypes().length != 0)
-					continue;
-				periodicCalls.put(m.getName(), p.millisBetweenUpdates());
-			}
-		}
+
+		System.out.println(this);
 	}
 	
 	public Map<String, Integer> periodicCalls() {
@@ -55,7 +58,12 @@ public class Channel {
 	}
 	
 	public boolean accepts(Object o) {
-		return messagesToListen.contains(o.getClass());
+		
+		boolean ret = messagesToListen.contains(o.getClass()) || messagesToListen.contains(IMCMessage.class);
+		if (ret)
+			System.out.println(o.getClass().getSimpleName()+" -> "+agentClass);
+			
+		return ret;
 	}
 	
 	public boolean allowedToSend(Object o) {

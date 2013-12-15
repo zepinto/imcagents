@@ -57,11 +57,13 @@ public class ImcAgent extends UntypedActor {
 
 	@Override
 	public final void onReceive(Object msg) throws Exception {
+		boolean handled = false;
 		// First message sent to each agent its their properties
 		if (msg instanceof Properties) {
 			PropertyUtils.setProperties(this, ((Properties)msg), false);
 			bus = getSender();
 			init();
+			handled = true;
 		}
 		else if (msg instanceof PeriodicCall) {
 			PeriodicCall call = (PeriodicCall) msg;
@@ -74,15 +76,30 @@ public class ImcAgent extends UntypedActor {
 			catch (Exception e) {
 				e.printStackTrace();
 			}
+			handled = true;
 		}
 		// A "stop" message is sent to each agent right before terminating
-		else if ("stop".equals(msg))
+		else if ("stop".equals(msg)) {
 			stop();
+			handled = true;
+		}
+		
 		// All other cases will correspond to message events
-		else if (messageHandlers.containsKey(msg.getClass()))
-			messageHandlers.get(msg.getClass()).invoke(this, msg);		
-		else
+		if (msg instanceof IMCMessage) {
+			// Check if there is a "generic" message handler
+			if (messageHandlers.containsKey(IMCMessage.class)) {
+				messageHandlers.get(IMCMessage.class).invoke(this, msg);
+				handled = true;
+			}
+			// Check for specific message handlers
+			if (messageHandlers.containsKey(msg.getClass())) {
+				messageHandlers.get(msg.getClass()).invoke(this, msg);
+				handled = true;
+			}
+		}		
+		
 		// If there is no handler for this type of message, signal that back
+		if (!handled)
 			unhandled(msg);
 	}
 }

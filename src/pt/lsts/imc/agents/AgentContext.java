@@ -83,16 +83,16 @@ public class AgentContext {
 				catch (Exception e) {
 					c = Class.forName("pt.lsts.imc.agents."+name);
 				}
-				//for (int i = 0; i < 100; i++)
-					bootstrap(c, props);
+				
+				bootstrap(c, props);
 			}			
 		}
-		
-		
-		System.out.println(local_port);
 	}
 	
 	public ActorRef bootstrap(Class<?> c, Properties properties) {
+		
+		System.out.println("Creating agent of class "+c.getName());
+		
 		ActorRef ref = system.actorOf(Props.create(c));
 		Channel chan = new Channel(c);
 		bus.tell(chan, ref);
@@ -135,7 +135,7 @@ public class AgentContext {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new AgentContext(new File("/home/zp/Desktop/agents.props"));
+		new AgentContext(new File("conf/twirl.props"));
 	}
 
 }

@@ -238,4 +238,12 @@ public class UnicycleModel {
 	public void setMaxSteeringRad(double maxSteeringRad) {
 		this.maxSteeringRad = maxSteeringRad;
 	}
+
+	public double getSpeedMPS() {
+		return speedMPS;
+	}
+
+	public void setSpeedMPS(double speedMPS) {
+		this.speedMPS = speedMPS;
+	}
 }

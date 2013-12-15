@@ -48,7 +48,6 @@ public abstract class ControllerAgent extends ImcAgent {
 	@Periodic(millisBetweenUpdates=1000)
 	public final void sendReference() {
 		Reference ref = guide();
-		System.out.println(ref);
 		if (ref != null)
 			send(ref);
 		else {

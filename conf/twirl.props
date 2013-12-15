@@ -1,0 +1,12 @@
+[AgentContext]
+	src_id = 1090
+	local_port = 6010
+
+[pt.lsts.imc.agents.control.TwirlSurvey]
+	dvn 	= 0.1
+	dve 	= 0.1
+	radius 	= 150
+
+[pt.lsts.imc.agents.sim.LAUVSimulator]
+
+[pt.lsts.imc.agents.sim.Logger]
