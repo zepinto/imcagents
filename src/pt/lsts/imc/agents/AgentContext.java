@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 import org.ini4j.Ini;
@@ -42,7 +43,15 @@ public class AgentContext {
 	// real time is the default clock
 	//private Clock clock = new RTClock();
 	private Clock clock = new SimulationClock(1.0);
+	private Vector<ActorRef> actors = new Vector<>();
 
+	public int entityOf(ActorRef actor) {
+		if (!actors.contains(actor))
+			actors.add(actor);
+		
+		return actors.indexOf(actor);
+	}
+	
 	// Singleton
 	private static AgentContext instance = null;
 	private AgentContext(File config) {

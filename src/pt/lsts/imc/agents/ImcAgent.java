@@ -22,7 +22,7 @@ public class ImcAgent extends UntypedActor {
 
 	private ActorRef bus;
 	private LinkedHashMap<Class<?>, Method> messageHandlers = new LinkedHashMap<>();	
-
+	
 	// Initialization block that uses introspection to build message handlers structure
 	{
 		HashSet<Method> methods = new HashSet<>();
@@ -43,6 +43,8 @@ public class ImcAgent extends UntypedActor {
 	}
 
 	public void send(IMCMessage m) {
+		m.setSrc(AgentContext.instance().src_id);
+		m.setSrcEnt(AgentContext.instance().entityOf(getSelf()));
 		if (bus != null)
 			bus.tell(m, getSelf());		
 	}

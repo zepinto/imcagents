@@ -1,7 +1,5 @@
 package pt.lsts.imc.agents;
 
-import info.zepinto.props.Property;
-
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
@@ -34,7 +32,7 @@ public class MessageBus extends UntypedActor {
 		if (!channels.get(getSender()).allowedToSend(arg0)) {
 			throw new Exception("Sender not allowed to send "+arg0.getClass());
 		}
-
+		
 		// Send this message to all children that are listening to this event type
 		for (Entry<ActorRef, Channel> entry : channels.entrySet()) {
 			if (entry.getValue().accepts(arg0)) {
@@ -45,4 +43,6 @@ public class MessageBus extends UntypedActor {
 			}
 		}
 	}
+	
+	
 }
