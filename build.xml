@@ -1,0 +1,48 @@
+<project name="IMCAgents" default="all">
+
+	<property name="test-dir" location="src-junit" />
+
+	<path id="classpath.base">
+		<pathelement location="build" />
+		<pathelement location="lib/akka-actor_2.10-2.2.3.jar" />
+		<pathelement location="lib/annprops-1.0.jar" />
+		<pathelement location="lib/config-1.0.2.jar" />
+		<pathelement location="lib/imc-src-5.2-rc1.jar" />
+		<pathelement location="lib/ini4j-0.5.2.jar" />
+		<pathelement location="lib/scala-library.jar" />
+	</path>
+
+	<path id="classpath.test">
+		<pathelement location="${test.dir}" />
+		<pathelement location="lib/junit-4.10.jar" />
+		<path refid="classpath.base" />
+	</path>
+
+	<target name="compile-test" depends="compile">
+		<javac encoding="UTF-8" srcdir="src-junit" destdir="build"
+			includes="**/*.java" fork="false">
+			<classpath refid="classpath.test" />
+		</javac>
+	</target>
+
+	<target name="test" depends="compile-test">
+		<junit>
+			<classpath refid="classpath.test" />
+			<formatter type="brief" usefile="false" />
+			<test name="pt.lsts.imc.agents.tests.TestLocation" />
+		</junit>
+	</target>
+
+	<target name="all" depends="compile,test" />
+
+	<target name="compile">
+		<mkdir dir="build" />
+		<delete dir="build" />
+		<mkdir dir="build" />
+		<javac encoding="UTF-8" srcdir="src;src-sim;src-control"
+			destdir="build" includes="**/*.java" fork="false">
+			<classpath refid="classpath.base"/>
+		</javac>
+	</target>
+
+</project>
