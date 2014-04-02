@@ -29,7 +29,6 @@ public abstract class VehicleSimulator extends ImcAgent {
 	
 	@Periodic(millisBetweenUpdates=1000)
 	public final void update() {
-		System.out.println("update");
 		pathControlState = update(desiredPath, model);
 		long now = AgentContext.instance().getTime();
 		model.advance(now - lastTime);
@@ -67,6 +66,8 @@ public abstract class VehicleSimulator extends ImcAgent {
 		pathControlState = update(desiredPath, model);
 		lastTime 	= now;
 	}
+	
+	public abstract void resetPose(Pose pose);
 	
 	public abstract PathControlState update(DesiredPath path, UnicycleModel model); 
 	

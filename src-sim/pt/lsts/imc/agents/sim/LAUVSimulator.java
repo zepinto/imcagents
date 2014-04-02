@@ -1,15 +1,19 @@
 package pt.lsts.imc.agents.sim;
 
+import info.zepinto.props.Property;
 import pt.lsts.imc.DesiredPath;
 import pt.lsts.imc.PathControlState;
 import pt.lsts.imc.agents.coords.Location;
+import pt.lsts.imc.agents.coords.Pose;
 import pt.lsts.imc.annotations.Agent;
 
 @Agent(name="LAUV Simulator", publishes={})
 public class LAUVSimulator extends VehicleSimulator {
 
+	@Property
+	private double lat, lon, roll, pitch, yaw;
+	
 	public PathControlState update(DesiredPath path, UnicycleModel model) {
-		System.out.println("update model");
 		PathControlState state = new PathControlState();
 		double speed = 1.25;
 		if (path != null) {
@@ -50,8 +54,15 @@ public class LAUVSimulator extends VehicleSimulator {
 		
 	
 		//TODO
-		return state;
-		
+		return state;		
+	}
+	
+	@Override
+	public void resetPose(Pose pose) {
+		model.setLocation(pose.getLocation());
+		model.setRollRad(pose.getRollRads());
+		model.setPitchRad(pose.getPitchRads());
+		model.setYawRad(pose.getYawRads());
 	}
 	
 	public double rpmToMps(double rpm) {
