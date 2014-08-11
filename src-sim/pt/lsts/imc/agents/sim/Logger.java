@@ -5,6 +5,7 @@ import info.zepinto.props.Property;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import pt.lsts.imc.IMCMessage;
 import pt.lsts.imc.agents.ImcAgent;
@@ -25,7 +26,9 @@ public class Logger extends ImcAgent {
 	public void init() {
 		super.init();
 		SimpleDateFormat date = new SimpleDateFormat("yyyyMMdd");
+		date.setTimeZone(TimeZone.getTimeZone("UTC"));
 		SimpleDateFormat time = new SimpleDateFormat("HHmmss");
+		time.setTimeZone(TimeZone.getTimeZone("UTC"));
 		String dir = log.replaceAll("\\$time", time.format(new Date()));
 		dir = dir.replaceAll("\\$day", date.format(new Date()));
 		new File(dir).mkdirs();
@@ -33,8 +36,7 @@ public class Logger extends ImcAgent {
 	}
 	
 	@Consume
-	public void on(IMCMessage m) {
-		
+	public void on(IMCMessage m) {		
 		try {
 			logger.logMessage(m);
 			logger.flushLogs();

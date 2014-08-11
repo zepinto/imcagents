@@ -42,7 +42,7 @@ public class AgentContext {
 	
 	// real time is the default clock
 	//private Clock clock = new RTClock();
-	private Clock clock = new SimulationClock(1.0);
+	private Clock clock = new SimulationClock(5.0);
 	private Vector<ActorRef> actors = new Vector<>();
 
 	public int entityOf(ActorRef actor) {

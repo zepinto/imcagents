@@ -43,6 +43,7 @@ public class ImcAgent extends UntypedActor {
 	}
 
 	public void send(IMCMessage m) {
+		m.setTimestampMillis(AgentContext.instance().getTime());
 		m.setSrc(AgentContext.instance().src_id);
 		m.setSrcEnt(AgentContext.instance().entityOf(getSelf()));
 		if (bus != null)
