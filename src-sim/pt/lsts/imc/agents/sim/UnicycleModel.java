@@ -62,8 +62,8 @@ public class UnicycleModel {
 	 */
 	public void advance(double timestepSecs) {
 		double angle = yawRad;
-		x += speedMPS * timestepSecs * Math.sin(angle);
-		y += speedMPS * timestepSecs * Math.cos(angle);
+		x += speedMPS * timestepSecs * Math.cos(angle);
+		y += speedMPS * timestepSecs * Math.sin(angle);
 		depth += speedMPS * timestepSecs * Math.sin(pitchRad);
 
 		if (depth > 0)
@@ -83,12 +83,12 @@ public class UnicycleModel {
 			speedMPS = rollRad = pitchRad = 0;
 			return true;            
 		}            
-
+		System.out.println(getCurrentPosition()+" --> "+loc);
 		speedMPS = speed;
 		if (loc.getDepth() > depth+0.1)
-			pitchRad = Math.toRadians(12);
+			pitchRad = Math.toRadians(15);
 		else if (loc.getDepth() < depth-0.1)
-			pitchRad = -Math.toRadians(12);
+			pitchRad = -Math.toRadians(15);
 		else {
 			depth = loc.getDepth();
 			pitchRad = 0;
@@ -97,7 +97,7 @@ public class UnicycleModel {
 		double ang = getCurrentPosition().angleTo(loc);
 
 		double diffAng = yawRad - ang;
-
+		
 		while (diffAng > Math.PI)
 			diffAng -= Math.PI * 2;
 		while (diffAng < -Math.PI)

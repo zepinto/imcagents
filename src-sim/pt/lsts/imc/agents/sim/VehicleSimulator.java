@@ -22,7 +22,7 @@ public abstract class VehicleSimulator extends ImcAgent {
 	private long lastTime = 0;
 	
 	@Property
-	public double latDegrees = 41, lonDegrees = -8, depth = 0;
+	public double latDegrees = 41.184483, lonDegrees = -8.7057, depth = 5;
 	
 	@Property
 	public double rollDegs = 0, pitchDegs = 0, yawDegs = 0;
@@ -31,7 +31,8 @@ public abstract class VehicleSimulator extends ImcAgent {
 	public final void update() {
 		pathControlState = update(desiredPath, model);
 		long now = AgentContext.instance().getTime();
-		model.advance(now - lastTime);
+		
+		model.advance((now - lastTime)/1000.0);
 		lastTime 	= now;
 		Pose pose 	= model.getState();
 		latDegrees 	= pose.getLocation().getLatDegrees();
@@ -62,7 +63,7 @@ public abstract class VehicleSimulator extends ImcAgent {
 	protected void on(DesiredPath path) {
 		this.desiredPath = path;
 		long now = AgentContext.instance().getTime();
-		model.advance(now - lastTime);
+		//model.advance(now - lastTime);
 		pathControlState = update(desiredPath, model);
 		lastTime 	= now;		
 	}

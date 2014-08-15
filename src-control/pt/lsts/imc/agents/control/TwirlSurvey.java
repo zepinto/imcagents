@@ -1,12 +1,10 @@
 package pt.lsts.imc.agents.control;
 
 import info.zepinto.props.Property;
-import pt.lsts.imc.DesiredSpeed;
-import pt.lsts.imc.DesiredSpeed.SPEED_UNITS;
+import pt.lsts.imc.DesiredPath;
 import pt.lsts.imc.DesiredZ;
 import pt.lsts.imc.DesiredZ.Z_UNITS;
 import pt.lsts.imc.PathControlState;
-import pt.lsts.imc.Reference;
 import pt.lsts.imc.agents.AgentContext;
 import pt.lsts.util.WGS84Utilities;
 
@@ -37,7 +35,7 @@ public class TwirlSurvey extends ControllerAgent {
 	double speed = 1.25;
 	
 	@Property
-	DesiredSpeed.SPEED_UNITS speedUnits = SPEED_UNITS.METERS_PS;
+	DesiredPath.SPEED_UNITS speedUnits = DesiredPath.SPEED_UNITS.METERS_PS;
 	
 	private DesiredZ z = new DesiredZ(0, Z_UNITS.DEPTH);
 	private boolean descend = true;
@@ -46,7 +44,7 @@ public class TwirlSurvey extends ControllerAgent {
 	private long lastLoiterTime = -1;
 
 	@Override
-	public Reference guide() {
+	public DesiredPath guide() {
 		if (estimatedState == null)
 			return null;
 		
@@ -67,7 +65,7 @@ public class TwirlSurvey extends ControllerAgent {
 		if (start == 0 && pathControlState != null && ((pathControlState.getFlags() & PathControlState.FL_LOITERING) != 0))
 			start = AgentContext.instance().getTime();
 		
-		Reference ref = new Reference();
+		DesiredPath ref = new DesiredPath();
 		
 		boolean nearBottom = estimatedState.getAlt() != -1 && estimatedState.getAlt() < 3;
 		
@@ -80,12 +78,12 @@ public class TwirlSurvey extends ControllerAgent {
 			z.setValue(maxZ);
 		}
 		
-		ref.setLat(Math.toRadians(dest[0]));
-		ref.setLon(Math.toRadians(dest[1]));
-		ref.setZ(z);
-		ref.setSpeed(new DesiredSpeed(speed, speedUnits));		
-		ref.setRadius(radius);
-
+		ref.setEndLat(Math.toRadians(dest[0]));
+		ref.setEndLon(Math.toRadians(dest[1]));
+		ref.setEndZ(z.getValue());
+		ref.setSpeed(speed);
+		ref.setSpeedUnits(speedUnits);
+		ref.setLradius(radius);
 		return ref;
 	}
 

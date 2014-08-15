@@ -58,12 +58,7 @@ public class Channel {
 	}
 	
 	public boolean accepts(Object o) {
-		
-		boolean ret = messagesToListen.contains(o.getClass()) || messagesToListen.contains(IMCMessage.class);
-		if (ret)
-			System.out.println(o.getClass().getSimpleName()+" -> "+agentClass);
-			
-		return ret;
+		return messagesToListen.contains(o.getClass()) || messagesToListen.contains(IMCMessage.class);		
 	}
 	
 	public boolean allowedToSend(Object o) {

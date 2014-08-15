@@ -1,5 +1,6 @@
 package pt.lsts.imc.agents.control;
 
+import pt.lsts.imc.DesiredPath;
 import pt.lsts.imc.EstimatedState;
 import pt.lsts.imc.FollowRefState;
 import pt.lsts.imc.PathControlState;
@@ -7,13 +8,12 @@ import pt.lsts.imc.PlanControl;
 import pt.lsts.imc.PlanControl.OP;
 import pt.lsts.imc.PlanControl.TYPE;
 import pt.lsts.imc.PlanControlState;
-import pt.lsts.imc.Reference;
 import pt.lsts.imc.agents.ImcAgent;
 import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.Periodic;
 
-@Agent(name="Abstract Controller", publishes={Reference.class, PlanControl.class})
+@Agent(name="Abstract Controller", publishes={DesiredPath.class, PlanControl.class})
 public abstract class ControllerAgent extends ImcAgent {
 
 	protected int entityId;
@@ -43,11 +43,11 @@ public abstract class ControllerAgent extends ImcAgent {
 	}
 
 	
-	public abstract Reference guide();
+	public abstract DesiredPath guide();
 
 	@Periodic(millisBetweenUpdates=1000)
 	public final void sendReference() {
-		Reference ref = guide();
+		DesiredPath ref = guide();
 		if (ref != null)
 			send(ref);
 		else {

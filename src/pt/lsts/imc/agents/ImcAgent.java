@@ -51,9 +51,6 @@ public class ImcAgent extends UntypedActor {
 				messageHandlers.put(params[0], m);
 			}
 		}
-		
-
-		
 	}
 
 	public void send(IMCMessage m) {
@@ -64,12 +61,10 @@ public class ImcAgent extends UntypedActor {
 			bus.tell(m, getSelf());		
 	}
 
-	public void init() {
-		System.out.println("init() for "+getClass().getSimpleName()+" called");
+	public void init() {		
 	}
 
-	public void stop() {
-		System.out.println("stop() for "+getClass().getSimpleName()+" called");
+	public void stop() {		
 	}
 	
 	protected void terminate() {

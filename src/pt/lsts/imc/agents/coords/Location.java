@@ -69,5 +69,10 @@ public class Location {
 	public void setDepth(double depth) {
 		this.depth = depth;
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("%.6f, %.6f, %.2f", latDegrees, lonDegrees, depth);
+	}
 		
 }
