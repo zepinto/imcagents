@@ -64,7 +64,7 @@ public abstract class VehicleSimulator extends ImcAgent {
 		long now = AgentContext.instance().getTime();
 		model.advance(now - lastTime);
 		pathControlState = update(desiredPath, model);
-		lastTime 	= now;
+		lastTime 	= now;		
 	}
 	
 	public abstract void resetPose(Pose pose);

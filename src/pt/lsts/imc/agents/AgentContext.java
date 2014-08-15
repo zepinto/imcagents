@@ -56,6 +56,9 @@ public class AgentContext {
 	private static AgentContext instance = null;
 	private AgentContext(File config) {
 		instance = this;
+		if (config == null)
+			return;
+		
 		try {
 			parseConfig(config);
 		}
@@ -65,6 +68,9 @@ public class AgentContext {
 	}
 	
 	public static AgentContext instance() {
+		if (instance == null) {
+			instance = new AgentContext(new File("conf/twirl.props"));
+		}
 		return instance;
 	}
 	
@@ -99,9 +105,6 @@ public class AgentContext {
 	}
 	
 	public ActorRef bootstrap(Class<?> c, Properties properties) {
-		
-		System.out.println("Creating agent of class "+c.getName());
-		
 		ActorRef ref = system.actorOf(Props.create(c));
 		Channel chan = new Channel(c);
 		bus.tell(chan, ref);

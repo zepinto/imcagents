@@ -50,10 +50,6 @@ public class LAUVSimulator extends VehicleSimulator {
 			state.setLradius(0);
 		}
 		
-		
-		
-	
-		//TODO
 		return state;		
 	}
 	

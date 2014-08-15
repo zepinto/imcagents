@@ -24,7 +24,7 @@ public abstract class ControllerAgent extends ImcAgent {
 	
 	@Consume
 	protected final void on(EstimatedState estate) {
-		this.estimatedState = estate;
+		this.estimatedState = estate;		
 	}
 	
 	@Consume
