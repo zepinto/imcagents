@@ -13,7 +13,6 @@ public class Logger extends ImcAgent {
 	
 	@Consume
 	public void on(IMCMessage m) {
-		
 		try {
 			LsfMessageLogger.log(m);
 		}

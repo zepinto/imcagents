@@ -83,7 +83,6 @@ public class UnicycleModel {
 			speedMPS = rollRad = pitchRad = 0;
 			return true;            
 		}            
-		System.out.println(getCurrentPosition()+" --> "+loc);
 		speedMPS = speed;
 		if (loc.getDepth() > depth+0.1)
 			pitchRad = Math.toRadians(15);

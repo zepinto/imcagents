@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import org.ini4j.Ini;
 
 import pt.lsts.imc.agents.clock.Clock;
-import pt.lsts.imc.agents.clock.SimulationClock;
+import pt.lsts.imc.agents.clock.RTClock;
 import scala.concurrent.duration.Duration;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
@@ -41,8 +41,8 @@ public class AgentContext {
 	private ActorSystem system;
 	
 	// real time is the default clock
-	//private Clock clock = new RTClock();
-	private Clock clock = new SimulationClock(10.0);
+	private Clock clock = new RTClock();
+	//private Clock clock = new SimulationClock(100.0);
 	private Vector<ActorRef> actors = new Vector<>();
 
 	public int entityOf(ActorRef actor) {
@@ -118,7 +118,6 @@ public class AgentContext {
 		}
 		return ref;
 	}
-
 
 	public ActorRef getBus() {
 		return bus;

@@ -72,36 +72,40 @@ public class ImcAgent extends UntypedActor {
 	}
 	
 	public byte[] serializeAgent() throws Exception {
-		// find .class where our code is stored
-		String classFile = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-		classFile += getClass().getCanonicalName().replaceAll("\\.", "/");
-		classFile+= ".class";
-		
-		// load class file into a byte array
-		FileInputStream fis = new FileInputStream(classFile);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		
 		ZipOutputStream zipOut = new ZipOutputStream(baos);
 		zipOut.setMethod(ZipOutputStream.DEFLATED);
 		zipOut.setLevel(9);
-		
+
 		// Create file with current state of the agent
 		String propsOut = PropertyUtils.saveProperties(this);
 		zipOut.putNextEntry(new ZipEntry("State"));
 		zipOut.write(propsOut.getBytes());
-		
+
 		// Create file with class (behavior) definition
 		zipOut.putNextEntry(new ZipEntry("Behavior"));
+
+		// find .class where our code is stored
+		String classFile = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+		classFile += getClass().getCanonicalName().replaceAll("\\.", "/");
+		classFile+= ".class";
+
+		// load class file into a byte array
+		FileInputStream fis = new FileInputStream(classFile);
 		byte buffer[] = new byte[1024];
 		int read = 0;
 		
+		// write all bytes to the output stream
 		while ((read = fis.read(buffer)) > 0) {
 			zipOut.write(buffer, 0, read);
 		}
+		
+		// close all streams
 		fis.close();
 		baos.close();
 		zipOut.close();
 		
+		// return resulting data
 		return baos.toByteArray();		
 	}
 
