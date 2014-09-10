@@ -13,23 +13,38 @@ import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.Periodic;
 
-public class Channel {
+/**
+ * This class aggregates information about one agent in terms of its inputs and
+ * outputs (interface). Inputs are messages listened and periodic calls, while
+ * outputs are the messages that the agent declares to produce.
+ * 
+ * @author zp
+ *
+ */
+public class AgentInterface {
 
 	private HashSet<Class<?>> messagesToListen = new HashSet<>();
 	private HashSet<Class<?>> messagesProduced = new HashSet<>();
 	private LinkedHashMap<String, Integer> periodicCalls = new LinkedHashMap<>();
 	private Class<?> agentClass;
-	
-	public Channel(Class<?> agentClass) {
+
+	/**
+	 * Constructs an AgentInterface that will use introspection to populate
+	 * valid inputs and output for given Agent class.
+	 * 
+	 * @param agentClass
+	 *            The class to be used to populate the interface
+	 */
+	public AgentInterface(Class<?> agentClass) {
 		this.agentClass = agentClass;
 		for (Class<?> c = agentClass; c != Object.class; c = c.getSuperclass()) {
-			Agent a = c.getAnnotation(Agent.class);	
+			Agent a = c.getAnnotation(Agent.class);
 			if (a != null) {
 				for (Class<? extends IMCMessage> m : a.publishes()) {
-					messagesProduced.add(m);					
+					messagesProduced.add(m);
 				}
 			}
-			
+
 			for (Method m : getMethods(c)) {
 				Consume cons = m.getAnnotation(Consume.class);
 				Periodic p = m.getAnnotation(Periodic.class);
@@ -37,7 +52,7 @@ public class Channel {
 					Class<?>[] params = m.getParameterTypes();
 					if (params.length != 1)
 						continue;
-					
+
 					m.setAccessible(true);
 					messagesToListen.add(m.getParameterTypes()[0]);
 				}
@@ -48,39 +63,59 @@ public class Channel {
 				}
 			}
 		}
-		
-
-		System.out.println(this);
 	}
-	
+
+	/**
+	 * @return An unmodifiable map with all the methods marked with
+	 *         {@link Periodic} annotaion.
+	 */
 	public Map<String, Integer> periodicCalls() {
 		return Collections.unmodifiableMap(periodicCalls);
 	}
-	
+
+	/**
+	 * Checks this interface to verify if it accepts the given message type
+	 * 
+	 * @param o
+	 *            A message of any type.
+	 * @return <code>true</code> if the agent accepts messages of given type or
+	 *         <code>false</code> otherwise.
+	 */
 	public boolean accepts(Object o) {
-		return messagesToListen.contains(o.getClass()) || messagesToListen.contains(IMCMessage.class);		
+		return messagesToListen.contains(o.getClass())
+				|| messagesToListen.contains(IMCMessage.class);
 	}
-	
+
+	/**
+	 * Checks this interface to verify if this agent is allowed to sent messages
+	 * of given type.
+	 * 
+	 * @param o
+	 *            A message of any type.
+	 * 
+	 * @return <code>true</code> if the agent is allowed to send messages of
+	 *         given type or <code>false</code> otherwise.
+	 */
 	public boolean allowedToSend(Object o) {
 		return messagesProduced.contains(o.getClass());
 	}
-	
+
 	private static Collection<Method> getMethods(Class<?> clazz) {
 		HashSet<Method> methods = new HashSet<>();
 		methods.addAll(Arrays.asList(clazz.getMethods()));
 		methods.addAll(Arrays.asList(clazz.getDeclaredMethods()));
 		return methods;
-	}	
-	
+	}
+
 	@Override
 	public String toString() {
-		String s = agentClass.getSimpleName()+" in[ ";
+		String s = agentClass.getSimpleName() + " in[ ";
 		for (Class<?> c : messagesToListen)
-			s += c.getSimpleName()+" ";
+			s += c.getSimpleName() + " ";
 		s += "]  out[ ";
 		for (Class<?> c : messagesProduced)
-			s += c.getSimpleName()+" ";
-		
-		return s+"]";
+			s += c.getSimpleName() + " ";
+
+		return s + "]";
 	}
 }

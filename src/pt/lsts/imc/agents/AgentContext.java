@@ -106,7 +106,7 @@ public class AgentContext {
 	
 	public ActorRef bootstrap(Class<?> c, Properties properties) {
 		ActorRef ref = system.actorOf(Props.create(c));
-		Channel chan = new Channel(c);
+		AgentInterface chan = new AgentInterface(c);
 		bus.tell(chan, ref);
 		ref.tell(properties, bus);
 		Map<String, Integer> periodicCalls = chan.periodicCalls();
