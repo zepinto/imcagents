@@ -4,8 +4,6 @@ import info.zepinto.props.Property;
 import info.zepinto.props.PropertyUtils;
 
 import java.io.File;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -21,89 +19,84 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 
-import com.typesafe.config.ConfigFactory;
-
+/**
+ * This class defines a context where several agents can run and communicate
+ * locally. A context provides a message bus for agents to communicate and a
+ * clock implementation that can be used by agents running inside for keeping
+ * time. A context can created from a configuration file specifying a number of
+ * agents and their initial states. Only a single AgentContext is allowed to run
+ * per JVM instance (Singleton).
+ * 
+ * @author zp
+ *
+ */
 public class AgentContext {
 
 	@Property
-	int src_id = 0;
-	
-	@Property
-	int local_port = 9000;
-	
-	@Property
-	int remote_port = -1;
-	
-	@Property
-	String remote_host = "localhost";
-	
+	int uid = 0;
+
 	private ActorRef bus;
 	private ActorSystem system;
-	
+
 	// real time is the default clock
 	private Clock clock = new RTClock();
-	//private Clock clock = new SimulationClock(100.0);
 	private Vector<ActorRef> actors = new Vector<>();
 
 	public int entityOf(ActorRef actor) {
 		if (!actors.contains(actor))
 			actors.add(actor);
-		
+
 		return actors.indexOf(actor);
 	}
 	
 	// Singleton
 	private static AgentContext instance = null;
+
 	private AgentContext(File config) {
 		instance = this;
 		if (config == null)
 			return;
-		
+
 		try {
 			parseConfig(config);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static AgentContext instance() {
-		if (instance == null) {
-			instance = new AgentContext(new File("conf/twirl.props"));
-		}
 		return instance;
 	}
-	
+
 	public void parseConfig(File config) throws Exception {
 		Ini ini = new Ini(config);
 		Ini.Section sec = ini.get("AgentContext");
 		Properties properties = new Properties();
 		for (String option : sec.keySet())
 			properties.put(option, sec.fetch(option));
-		
+
 		PropertyUtils.setProperties(this, properties, false);
-		this.system = ActorSystem.create("IMCAgents", ConfigFactory.parseProperties(properties));
+		this.system = ActorSystem.create("IMCAgents");
 		this.bus = system.actorOf(Props.create(MessageBus.class));
-		
+
 		for (Ini.Section section : ini.values()) {
 			String name = section.getName();
 			Properties props = new Properties();
 			for (String option : section.keySet())
 				props.put(option, section.fetch(option));
-			if (!name.equals("AgentContext")) {							
+			if (!name.equals("AgentContext")) {
 				Class<?> c;
 				try {
 					c = Class.forName(name);
+				} catch (Exception e) {
+					c = Class.forName("pt.lsts.imc.agents." + name);
 				}
-				catch (Exception e) {
-					c = Class.forName("pt.lsts.imc.agents."+name);
-				}
-				
+
 				bootstrap(c, props);
-			}			
+			}
 		}
 	}
-	
+
 	public ActorRef bootstrap(Class<?> c, Properties properties) {
 		ActorRef ref = system.actorOf(Props.create(c));
 		AgentInterface chan = new AgentInterface(c);
@@ -111,42 +104,60 @@ public class AgentContext {
 		ref.tell(properties, bus);
 		Map<String, Integer> periodicCalls = chan.periodicCalls();
 		for (Entry<String, Integer> entry : periodicCalls.entrySet()) {
-			PeriodicCall call = new PeriodicCall(ref, entry.getKey(), entry.getValue());
+			PeriodicCall call = new PeriodicCall(ref, entry.getKey(),
+					entry.getValue());
 			system.scheduler().schedule(
-					Duration.create(clock.getDuration(entry.getValue()), TimeUnit.MILLISECONDS),
-					Duration.create(clock.getDuration(entry.getValue()), TimeUnit.MILLISECONDS), call, system.dispatcher());
+					Duration.create(clock.getDuration(entry.getValue()),
+							TimeUnit.MILLISECONDS),
+					Duration.create(clock.getDuration(entry.getValue()),
+							TimeUnit.MILLISECONDS), call, system.dispatcher());
 		}
 		return ref;
 	}
 
+	/**
+	 * @return reference to Bus actor that can be used to communicate with other
+	 *         (local) actors.
+	 */
 	public ActorRef getBus() {
 		return bus;
 	}
 
+	/**
+	 * @return akka ActorSystem where the actors are kept running
+	 */
 	public ActorSystem getSystem() {
 		return system;
 	}
 
+	/**
+	 * @return current time according to the configured clock
+	 */
 	public long getTime() {
 		return clock.getTimeMillis();
 	}
-	
+
+	/**
+	 * Uses the currently configured clock to calculate how much real-time a
+	 * logic time duration should take
+	 * 
+	 * @param millis
+	 *            A duration, in milliseconds
+	 * @return A logical duration, in milliseconds, of how much real-time the
+	 *         logic time duration should take
+	 */
 	public long getDuration(long millis) {
 		return clock.getDuration(millis);
 	}
 
-	public Date newDate() {
-		return new Date(clock.getTimeMillis());
-	}
-
-	public Calendar calendarInstance() {
-		Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(getTime());
-		return c;
+	/**
+	 * @return the Unique Identifier of this agent context 
+	 */
+	public int getUid() {
+		return uid;
 	}
 
 	public static void main(String[] args) throws Exception {
 		new AgentContext(new File("conf/twirl.props"));
 	}
-
 }
