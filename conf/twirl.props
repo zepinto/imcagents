@@ -1,10 +1,8 @@
 [AgentContext]
 	uid = 3454
 	
-[pt.lsts.imc.agents.control.TwirlSurvey]
-	dvn 	= 0.1
-	dve 	= 0.1
-	radius 	= 150
+[pt.lsts.imc.agents.control.GotoPoint]
+	plan_id = teste
 
 [pt.lsts.imc.agents.net.ImcProtocol]
 	local_port = 8000
@@ -12,3 +10,5 @@
 
 [pt.lsts.imc.agents.sim.Logger]
 	print = true
+	
+	
