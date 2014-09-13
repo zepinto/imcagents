@@ -33,7 +33,6 @@ public class ImcAgent extends UntypedActor {
 	private ActorRef bus;
 	private LinkedHashMap<Class<?>, Method> messageHandlers = new LinkedHashMap<>();
 	private LinkedHashMap<String, Method> eventHandlers = new LinkedHashMap<>();
-	
 
 	// Initialization block that uses introspection to build message handlers
 	// structure
@@ -61,7 +60,7 @@ public class ImcAgent extends UntypedActor {
 				m.setAccessible(true);
 				messageHandlers.put(params[0], m);
 			}
-			
+
 			for (Method m : methods) {
 				EventHandler h = m.getAnnotation(EventHandler.class);
 				if (h == null)
@@ -96,13 +95,34 @@ public class ImcAgent extends UntypedActor {
 		if (bus != null)
 			bus.tell(m, getSelf());
 	}
-	
+
+	/**
+	 * Creates and sends message of type {@link Event} with given topic and data
+	 * 
+	 * @param event
+	 *            The topic of the event to be send
+	 * @param data
+	 *            The data to be added to the event.
+	 */
 	public void sendEvent(String event, Map<String, ?> data) {
-		LinkedHashMap<String, Object> copy = new LinkedHashMap<>();
-		copy.putAll(data);
-		send(new Event().setTopic(event).setData(copy));
+		if (data != null) {
+			LinkedHashMap<String, Object> copy = new LinkedHashMap<>();
+			copy.putAll(data);
+			send(new Event().setTopic(event).setData(copy));
+		} else
+			sendEvent(event);
+
 	}
-	
+
+	/**
+	 * Creates and sends message of type {@link Event} with given topic and no
+	 * data
+	 * 
+	 * @param event
+	 *            The topic of the event
+	 * 
+	 * @see #sendEvent(String, Map)
+	 */
 	public void sendEvent(String event) {
 		send(new Event().setTopic(event));
 	}
@@ -200,21 +220,21 @@ public class ImcAgent extends UntypedActor {
 			stop();
 			return;
 		}
-		
+
 		if (msg instanceof Event) {
 			Event evt = (Event) msg;
 			if (eventHandlers.containsKey(evt.getTopic())) {
 				Method handler = eventHandlers.get(evt.getTopic());
-				
+
 				if (handler.getParameterTypes().length == 0) {
-					handler.invoke(this);					
-				}
-				else if (Map.class.isAssignableFrom(handler.getParameterTypes()[0])) {
-					handler.invoke(this, (Map<String, String>)evt.getData());
+					handler.invoke(this);
+				} else if (Map.class.isAssignableFrom(handler
+						.getParameterTypes()[0])) {
+					handler.invoke(this, (Map<String, String>) evt.getData());
 				}
 			}
 		}
-		
+
 		// All other cases will correspond to message events
 		if (msg instanceof IMCMessage) {
 			Class<?> clazz = msg.getClass();
