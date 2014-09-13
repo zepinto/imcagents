@@ -6,12 +6,9 @@
 	dve 	= 0.1
 	radius 	= 150
 
-[pt.lsts.imc.agents.net.ImcUdp]
+[pt.lsts.imc.agents.net.ImcProtocol]
 	local_port = 8000
-	remote_port = 6002
-	remote_host = localhost
-
-[pt.lsts.imc.agents.sim.LAUVSimulator]
+	local_name = imc_zp
 
 [pt.lsts.imc.agents.sim.Logger]
 	print = true

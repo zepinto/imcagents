@@ -102,7 +102,7 @@ public class AgentInterface {
 	 *         given type or <code>false</code> otherwise.
 	 */
 	public boolean allowedToSend(Object o) {
-		return messagesProduced.contains(o.getClass());
+		return messagesProduced.contains(o.getClass()) || messagesProduced.contains(IMCMessage.class);
 	}
 
 	private static Collection<Method> getMethods(Class<?> clazz) {

@@ -103,7 +103,7 @@ public class AgentContext {
 		
 		// Create an interface for the actor (using the annotations)
 		AgentInterface chan = new AgentInterface(c);
-		
+
 		bus.tell(chan, ref);
 		ref.tell(properties, bus);
 		Map<String, Integer> periodicCalls = chan.periodicCalls();
