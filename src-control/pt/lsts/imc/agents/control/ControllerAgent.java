@@ -41,7 +41,6 @@ public abstract class ControllerAgent extends ImcAgent {
 	protected final void on(PathControlState pathControlState) {
 		this.pathControlState = pathControlState;		
 	}
-
 	
 	public abstract DesiredPath guide();
 

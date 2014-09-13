@@ -8,18 +8,22 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import pt.lsts.imc.Event;
 import pt.lsts.imc.IMCMessage;
 import pt.lsts.imc.annotations.Consume;
+import pt.lsts.imc.annotations.EventHandler;
 import pt.lsts.imc.annotations.Periodic;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
 
 /**
- * This class is extended by all IMC agents (exchange IMC messages)
+ * This class is extended by all IMC agents (agents that exchange IMC messages
+ * according to a specified interface)
  * 
  * @author zp
  *
@@ -28,6 +32,8 @@ public class ImcAgent extends UntypedActor {
 
 	private ActorRef bus;
 	private LinkedHashMap<Class<?>, Method> messageHandlers = new LinkedHashMap<>();
+	private LinkedHashMap<String, Method> eventHandlers = new LinkedHashMap<>();
+	
 
 	// Initialization block that uses introspection to build message handlers
 	// structure
@@ -55,6 +61,24 @@ public class ImcAgent extends UntypedActor {
 				m.setAccessible(true);
 				messageHandlers.put(params[0], m);
 			}
+			
+			for (Method m : methods) {
+				EventHandler h = m.getAnnotation(EventHandler.class);
+				if (h == null)
+					continue;
+				String event = h.value();
+				Class<?>[] params = m.getParameterTypes();
+				if (params.length > 1)
+					continue;
+
+				// If there is subclass already handling these events, do not
+				// override it
+				if (eventHandlers.containsKey(event))
+					continue;
+
+				m.setAccessible(true);
+				eventHandlers.put(event, m);
+			}
 		}
 	}
 
@@ -72,6 +96,16 @@ public class ImcAgent extends UntypedActor {
 		if (bus != null)
 			bus.tell(m, getSelf());
 	}
+	
+	public void sendEvent(String event, Map<String, ?> data) {
+		LinkedHashMap<String, Object> copy = new LinkedHashMap<>();
+		copy.putAll(data);
+		send(new Event().setTopic(event).setData(copy));
+	}
+	
+	public void sendEvent(String event) {
+		send(new Event().setTopic(event));
+	}
 
 	/**
 	 * This method is called upon initialization. Override if needed.
@@ -86,6 +120,9 @@ public class ImcAgent extends UntypedActor {
 	public void stop() {
 	}
 
+	/**
+	 * This agent should not receive any more messages
+	 */
 	protected void terminate() {
 		context().stop(getSelf());
 	}
@@ -163,7 +200,21 @@ public class ImcAgent extends UntypedActor {
 			stop();
 			return;
 		}
-
+		
+		if (msg instanceof Event) {
+			Event evt = (Event) msg;
+			if (eventHandlers.containsKey(evt.getTopic())) {
+				Method handler = eventHandlers.get(evt.getTopic());
+				
+				if (handler.getParameterTypes().length == 0) {
+					handler.invoke(this);					
+				}
+				else if (Map.class.isAssignableFrom(handler.getParameterTypes()[0])) {
+					handler.invoke(this, (Map<String, String>)evt.getData());
+				}
+			}
+		}
+		
 		// All other cases will correspond to message events
 		if (msg instanceof IMCMessage) {
 			Class<?> clazz = msg.getClass();
