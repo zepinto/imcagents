@@ -5,7 +5,7 @@
 	<path id="classpath.base">
 		<pathelement location="build" />
 		<pathelement location="lib/akka-actor_2.10-2.2.3.jar" />
-		<pathelement location="lib/annprops-1.0.jar" />
+		<pathelement location="lib/annprops-1.1.jar" />
 		<pathelement location="lib/config-1.0.2.jar" />
 		<pathelement location="lib/imc-src-5.4.x.jar" />
 		<pathelement location="lib/ini4j-0.5.2.jar" />

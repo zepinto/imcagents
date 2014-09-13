@@ -14,6 +14,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import pt.lsts.imc.Event;
+import pt.lsts.imc.IMCDefinition;
 import pt.lsts.imc.IMCMessage;
 import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.EventHandler;
@@ -79,6 +80,22 @@ public class ImcAgent extends UntypedActor {
 				eventHandlers.put(event, m);
 			}
 		}
+	}
+
+	/**
+	 * Send a message to a known destination
+	 * 
+	 * @param destination
+	 *            The name of the imc destination (Example: "lauv-xplore-1")
+	 * @param m
+	 *            The message to be sent to the destination
+	 */
+	public void send(String destination, IMCMessage m) {
+		if (destination != null)
+			m.setDst(IMCDefinition.getInstance().getResolver()
+					.resolve(destination));
+
+		send(m);
 	}
 
 	/**
@@ -193,6 +210,15 @@ public class ImcAgent extends UntypedActor {
 
 		// return resulting data
 		return baos.toByteArray();
+	}
+	
+	public int getEntityId() {
+		return AgentContext.instance().entityOf(getSelf());
+	}
+	
+	public int getSrcId() {
+		//FIXME
+		return 0;
 	}
 
 	@Override
