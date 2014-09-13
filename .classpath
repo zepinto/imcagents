@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="src-control"/>
 	<classpathentry kind="src" path="src-sim"/>
 	<classpathentry kind="src" path="src-junit"/>
-	<classpathentry kind="src" path="src-folder"/>
+	<classpathentry kind="src" path="src-net"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="lib/annprops-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/akka-actor_2.10-2.2.3.jar"/>

@@ -41,12 +41,12 @@ public class AgentContext {
 	// real time is the default clock
 	private Clock clock = new RTClock();
 	private Vector<ActorRef> actors = new Vector<>();
-
+	
 	public int entityOf(ActorRef actor) {
 		if (!actors.contains(actor))
 			actors.add(actor);
 
-		return actors.indexOf(actor);
+		return actors.indexOf(actor) + 1;
 	}
 	
 	// Singleton
@@ -96,10 +96,14 @@ public class AgentContext {
 			}
 		}
 	}
-
+	
 	public ActorRef bootstrap(Class<?> c, Properties properties) {
+		// Create actor with default initial state
 		ActorRef ref = system.actorOf(Props.create(c));
+		
+		// Create an interface for the actor (using the annotations)
 		AgentInterface chan = new AgentInterface(c);
+		
 		bus.tell(chan, ref);
 		ref.tell(properties, bus);
 		Map<String, Integer> periodicCalls = chan.periodicCalls();

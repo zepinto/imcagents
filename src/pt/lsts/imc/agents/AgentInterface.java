@@ -27,6 +27,7 @@ public class AgentInterface {
 	private HashSet<Class<?>> messagesProduced = new HashSet<>();
 	private LinkedHashMap<String, Integer> periodicCalls = new LinkedHashMap<>();
 	private Class<?> agentClass;
+	private String agentName;
 
 	/**
 	 * Constructs an AgentInterface that will use introspection to populate
@@ -40,9 +41,13 @@ public class AgentInterface {
 		for (Class<?> c = agentClass; c != Object.class; c = c.getSuperclass()) {
 			Agent a = c.getAnnotation(Agent.class);
 			if (a != null) {
+				agentName = a.name();
 				for (Class<? extends IMCMessage> m : a.publishes()) {
 					messagesProduced.add(m);
 				}
+			}
+			else {
+				agentName = agentClass.getSimpleName();
 			}
 
 			for (Method m : getMethods(c)) {
@@ -105,6 +110,13 @@ public class AgentInterface {
 		methods.addAll(Arrays.asList(clazz.getMethods()));
 		methods.addAll(Arrays.asList(clazz.getDeclaredMethods()));
 		return methods;
+	}
+
+	/**
+	 * @return the agentName
+	 */
+	public String getAgentName() {
+		return agentName;
 	}
 
 	@Override

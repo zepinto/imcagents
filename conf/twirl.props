@@ -14,3 +14,4 @@
 [pt.lsts.imc.agents.sim.LAUVSimulator]
 
 [pt.lsts.imc.agents.sim.Logger]
+	print = true
