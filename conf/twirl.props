@@ -2,7 +2,7 @@
 	uid = 3454
 	
 [pt.lsts.imc.agents.control.GotoPoint]
-	plan_id = goto_point
+	ctrl_id = goto_one
 	latitude = 41
 	longitude = -8
 	speed = 1.2

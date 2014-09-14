@@ -111,6 +111,8 @@ public class ImcAgent extends UntypedActor {
 		m.setSrcEnt(AgentContext.instance().entityOf(getSelf()));
 		if (bus != null)
 			bus.tell(m, getSelf());
+		
+		System.out.println(m);
 	}
 
 	/**
@@ -128,7 +130,17 @@ public class ImcAgent extends UntypedActor {
 			send(new Event().setTopic(event).setData(copy));
 		} else
 			sendEvent(event);
-
+	}
+	
+	public void sendEvent(String event, Object... data) {
+		if (data != null) {
+			LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+			for (int i = 0; i < data.length-1; i+=2)
+				map.put(""+data[i], data[i+1]);
+			
+			send(new Event().setTopic(event).setData(map));
+		} else
+			sendEvent(event);
 	}
 
 	/**

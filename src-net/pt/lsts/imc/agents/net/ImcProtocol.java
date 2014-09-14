@@ -15,12 +15,12 @@ import pt.lsts.imc.net.IMCProtocol;
 import pt.lsts.neptus.messages.listener.MessageInfo;
 import pt.lsts.neptus.messages.listener.MessageListener;
 
-@Agent(name="IMC Protocol", publishes=IMCMessage.class)
+@Agent(name = "IMC Protocol", publishes = IMCMessage.class)
 public class ImcProtocol extends ImcAgent {
 
 	@Property
 	String local_name = "IMCAgents";
-	
+
 	@Property
 	int bind_port = 8448;
 
@@ -47,7 +47,7 @@ public class ImcProtocol extends ImcAgent {
 			}
 		});
 	}
-	
+
 	@Override
 	public void stop() {
 		super.stop();
@@ -62,7 +62,8 @@ public class ImcProtocol extends ImcAgent {
 			proto.sendMessage(name, msg);
 		} else {
 			for (Entry<String, Announce> ann : lastAnnounces.entrySet()) {
-				// send message to all peers
+				// send message to all peers (the ones that announced themselves
+				// recently)
 				if (System.currentTimeMillis()
 						- ann.getValue().getTimestampMillis() < 30000) {
 					proto.sendMessage(ann.getValue().getSysName(), msg);
