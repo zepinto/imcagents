@@ -67,6 +67,7 @@ public class ImcAgent extends UntypedActor {
 				if (h == null)
 					continue;
 				String event = h.value();
+				
 				Class<?>[] params = m.getParameterTypes();
 				if (params.length > 1)
 					continue;
@@ -75,7 +76,7 @@ public class ImcAgent extends UntypedActor {
 				// override it
 				if (eventHandlers.containsKey(event))
 					continue;
-
+				
 				m.setAccessible(true);
 				eventHandlers.put(event, m);
 			}
@@ -111,36 +112,57 @@ public class ImcAgent extends UntypedActor {
 		m.setSrcEnt(AgentContext.instance().entityOf(getSelf()));
 		if (bus != null)
 			bus.tell(m, getSelf());
-		
-		System.out.println(m);
 	}
 
 	/**
 	 * Creates and sends message of type {@link Event} with given topic and data
 	 * 
-	 * @param event
+	 * @param topic
 	 *            The topic of the event to be send
 	 * @param data
 	 *            The data to be added to the event.
 	 */
-	public void sendEvent(String event, Map<String, ?> data) {
+	public void sendEvent(String topic, Map<String, ?> data) {
 		if (data != null) {
 			LinkedHashMap<String, Object> copy = new LinkedHashMap<>();
 			copy.putAll(data);
-			send(new Event().setTopic(event).setData(copy));
+			send(new Event().setTopic(topic).setData(copy));
 		} else
-			sendEvent(event);
+			sendEvent(topic);
 	}
-	
-	public void sendEvent(String event, Object... data) {
+
+	/**
+	 * This method creates a message of type {@link Event} with given topic and
+	 * parses any remaining (pair of) arguments to initialize the included data.
+	 * Example: <br/>
+	 * 
+	 * <pre>
+	 * sendEvent(&quot;MyTopic&quot;, &quot;x&quot;, 23, &quot;y&quot;, -67, &quot;name&quot;, &quot;some string&quot;);
+	 * </pre>
+	 * 
+	 * will result in the creation of the following event:
+	 * 
+	 * <pre>
+	 * MyTopic { x = 23, y = -67, name = "some string" }
+	 * </pre>
+	 * 
+	 * @param topic
+	 *            The topic of the event to be send
+	 * @param data
+	 *            The data to be added to the event. The data is passed as list
+	 *            pairs of arguments where data[i] will be the key, data[i+1]
+	 *            will be the value.
+	 * 
+	 */
+	public void sendEvent(String topic, Object... data) {
 		if (data != null) {
 			LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-			for (int i = 0; i < data.length-1; i+=2)
-				map.put(""+data[i], data[i+1]);
-			
-			send(new Event().setTopic(event).setData(map));
+			for (int i = 0; i < data.length - 1; i += 2)
+				map.put("" + data[i], data[i + 1]);
+
+			send(new Event().setTopic(topic).setData(map));
 		} else
-			sendEvent(event);
+			sendEvent(topic);
 	}
 
 	/**
@@ -223,13 +245,13 @@ public class ImcAgent extends UntypedActor {
 		// return resulting data
 		return baos.toByteArray();
 	}
-	
+
 	public int getEntityId() {
 		return AgentContext.instance().entityOf(getSelf());
 	}
-	
+
 	public int getSrcId() {
-		//FIXME
+		// FIXME
 		return 0;
 	}
 

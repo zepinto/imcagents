@@ -1,13 +1,16 @@
 package pt.lsts.imc.agents.control;
 
-import pt.lsts.imc.DesiredSpeed.SPEED_UNITS;
+import java.util.Map;
+
 import pt.lsts.imc.DesiredSpeed;
+import pt.lsts.imc.DesiredSpeed.SPEED_UNITS;
 import pt.lsts.imc.DesiredZ;
 import pt.lsts.imc.DesiredZ.Z_UNITS;
 import pt.lsts.imc.Event;
-import pt.lsts.imc.annotations.Agent;
-import pt.lsts.imc.annotations.Periodic;
 import pt.lsts.imc.Reference;
+import pt.lsts.imc.annotations.Agent;
+import pt.lsts.imc.annotations.EventHandler;
+import pt.lsts.imc.annotations.Periodic;
 
 @Agent(name="GotoPoint", publishes=Event.class)
 public class GotoPoint extends WaypointController {
@@ -25,6 +28,16 @@ public class GotoPoint extends WaypointController {
 	public void startControl() {
 		if (currentState != STATE.Controlling)
 			sendEvent("setBehavior", "ctrl_id", ctrl_id);
+	}
+	
+	@EventHandler("LinkCreated")
+	public void newLink(Map<String, ?> data) {
+		System.out.println("New Link: "+data);
+	}
+	
+	@EventHandler("LinkDropped")
+	public void dropLink(Map<String, ?> data) {
+		System.out.println("Drop Link: "+data);
 	}
 	
 	@Override

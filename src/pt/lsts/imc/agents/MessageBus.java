@@ -19,7 +19,6 @@ public class MessageBus extends UntypedActor {
 
 	@Override
 	public void onReceive(Object arg0) throws Exception {
-
 		if (getSender().equals(getSelf())) {
 			return;
 		}

@@ -8,9 +8,11 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import pt.lsts.imc.Event;
 import pt.lsts.imc.IMCMessage;
 import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.Consume;
+import pt.lsts.imc.annotations.EventHandler;
 import pt.lsts.imc.annotations.Periodic;
 
 /**
@@ -53,6 +55,8 @@ public class AgentInterface {
 			for (Method m : getMethods(c)) {
 				Consume cons = m.getAnnotation(Consume.class);
 				Periodic p = m.getAnnotation(Periodic.class);
+				EventHandler ev = m.getAnnotation(EventHandler.class);
+				
 				if (cons != null) {
 					Class<?>[] params = m.getParameterTypes();
 					if (params.length != 1)
@@ -65,6 +69,10 @@ public class AgentInterface {
 					if (m.getParameterTypes().length != 0)
 						continue;
 					periodicCalls.put(m.getName(), p.millisBetweenUpdates());
+				}
+				if (ev != null) {
+					m.setAccessible(true);
+					messagesToListen.add(Event.class);
 				}
 			}
 		}

@@ -1,6 +1,8 @@
 [AgentContext]
 	uid = 3454
 	
+[pt.lsts.imc.agents.util.AvailableLinksMonitor]	
+
 [pt.lsts.imc.agents.control.GotoPoint]
 	ctrl_id = goto_one
 	latitude = 41
