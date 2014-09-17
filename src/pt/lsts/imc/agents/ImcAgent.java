@@ -67,7 +67,7 @@ public class ImcAgent extends UntypedActor {
 				if (h == null)
 					continue;
 				String event = h.value();
-				
+
 				Class<?>[] params = m.getParameterTypes();
 				if (params.length > 1)
 					continue;
@@ -76,7 +76,7 @@ public class ImcAgent extends UntypedActor {
 				// override it
 				if (eventHandlers.containsKey(event))
 					continue;
-				
+
 				m.setAccessible(true);
 				eventHandlers.put(event, m);
 			}
@@ -137,15 +137,12 @@ public class ImcAgent extends UntypedActor {
 	 * Example: <br/>
 	 * 
 	 * <pre>
-	 * sendEvent(&quot;MyTopic&quot;, &quot;x&quot;, 23, &quot;y&quot;, -67, &quot;name&quot;, &quot;some string&quot;);
+	 * &#064;Consume
+	 * public void on(Announce ann) { 	
+	 *   sendEvent(&quot;NewLink&quot;, &quot;name&quot;, ann.getSysName(), &quot;type&quot;, ann
+	 * 	   .getSysType().toString());
+	 * }
 	 * </pre>
-	 * 
-	 * will result in the creation of the following event:
-	 * 
-	 * <pre>
-	 * MyTopic { x = 23, y = -67, name = "some string" }
-	 * </pre>
-	 * 
 	 * @param topic
 	 *            The topic of the event to be send
 	 * @param data

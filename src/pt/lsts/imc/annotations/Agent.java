@@ -11,5 +11,5 @@ import pt.lsts.imc.IMCMessage;
 @Target(ElementType.TYPE)
 public @interface Agent {
 	String name();
-	Class<? extends IMCMessage>[] publishes();
+	Class<? extends IMCMessage>[] publishes();	
 }

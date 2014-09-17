@@ -37,7 +37,7 @@ public class GotoPoint extends WaypointController {
 	
 	@EventHandler("LinkDropped")
 	public void dropLink(Map<String, ?> data) {
-		System.out.println("Drop Link: "+data);
+		System.out.println("Link Dropped: "+data);
 	}
 	
 	@Override

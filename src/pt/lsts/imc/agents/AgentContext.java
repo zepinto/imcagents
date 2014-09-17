@@ -37,7 +37,7 @@ public class AgentContext {
 
 	private ActorRef bus;
 	private ActorSystem system;
-
+	
 	// real time is the default clock
 	private Clock clock = new RTClock();
 	private Vector<ActorRef> actors = new Vector<>();
@@ -93,8 +93,6 @@ public class AgentContext {
 				}
 
 				bootstrap(c, props);
-				
-				
 			}
 		}
 	}

@@ -127,6 +127,27 @@ public class AgentInterface {
 		return agentName;
 	}
 
+	/**
+	 * @return the messagesToListen
+	 */
+	public HashSet<Class<?>> getMessagesToListen() {
+		return messagesToListen;
+	}
+
+	/**
+	 * @return the messagesProduced
+	 */
+	public HashSet<Class<?>> getMessagesProduced() {
+		return messagesProduced;
+	}
+
+	/**
+	 * @return the periodicCalls
+	 */
+	public LinkedHashMap<String, Integer> getPeriodicCalls() {
+		return periodicCalls;
+	}
+
 	@Override
 	public String toString() {
 		String s = agentClass.getSimpleName() + " in[ ";

@@ -1,4 +1,4 @@
-package pt.lsts.imc.agents.util;
+package pt.lsts.imc.agents.net;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -20,10 +20,10 @@ public class AvailableLinksMonitor extends ImcAgent {
 	@Consume
 	public void on(Announce ann) {
 		if (!lastAnnounceBySystem.containsKey(ann.getSysName())) {
-			lastAnnounceBySystem.put(ann.getSysName(), ann);
 			sendEvent("LinkCreated", "name", ann.getSysName(), "type", ann
 					.getSysType().toString());
 		}
+		lastAnnounceBySystem.put(ann.getSysName(), ann);
 	}
 
 	@Periodic(millisBetweenUpdates = 5000)

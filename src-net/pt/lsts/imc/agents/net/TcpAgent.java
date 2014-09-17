@@ -1,4 +1,4 @@
-package pt.lsts.imc.agents.transport;
+package pt.lsts.imc.agents.net;
 
 import java.util.Vector;
 

@@ -1,7 +1,14 @@
 [AgentContext]
 	uid = 3454
 	
-[pt.lsts.imc.agents.util.AvailableLinksMonitor]	
+[pt.lsts.imc.agents.sim.Logger]
+	print = false
+
+[pt.lsts.imc.agents.net.ImcProtocol]
+	local_port = 8000
+	local_name = imc_zp
+
+[pt.lsts.imc.agents.net.AvailableLinksMonitor]	
 
 [pt.lsts.imc.agents.control.GotoPoint]
 	ctrl_id = goto_one
@@ -10,12 +17,4 @@
 	speed = 1.2
 	depth = 2
 	vehicle = lauv-seacon-1
-
-[pt.lsts.imc.agents.net.ImcProtocol]
-	local_port = 8000
-	local_name = imc_zp
-
-[pt.lsts.imc.agents.sim.Logger]
-	print = false
-	
 	
