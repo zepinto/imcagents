@@ -15,6 +15,10 @@
 	<path id="classpath.test">
 		<pathelement location="${test.dir}" />
 		<pathelement location="lib/junit-4.10.jar" />
+		<pathelement location="lib/reflections-0.9.9-RC1.jar" />
+		<pathelement location="lib/javassist.jar" />
+		<pathelement location="lib/guava-18.0.jar" />
+		<pathelement location="lib/slf4j-api-1.7.7.jar" />
 		<path refid="classpath.base" />
 	</path>
 
@@ -30,6 +34,7 @@
 			<classpath refid="classpath.test" />
 			<formatter type="brief" usefile="false" />
 			<test name="pt.lsts.imc.agents.tests.TestLocation" />
+			<test name="pt.lsts.imc.agents.tests.TestAgents" />
 		</junit>
 	</target>
 
