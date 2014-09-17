@@ -10,14 +10,14 @@
 	<classpathentry kind="lib" path="lib/akka-actor_2.10-2.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/annprops-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/config-1.0.2.jar"/>
-	<classpathentry kind="lib" path="lib/guava-18.0.jar"/>
 	<classpathentry kind="lib" path="lib/imc-src-5.4.x.jar"/>
 	<classpathentry kind="lib" path="lib/ini4j-0.5.2.jar"/>
-	<classpathentry kind="lib" path="lib/javassist.jar"/>
-	<classpathentry kind="lib" path="lib/junit-4.10.jar"/>
 	<classpathentry kind="lib" path="lib/libimc.jar"/>
-	<classpathentry kind="lib" path="lib/reflections-0.9.9-RC1.jar"/>
 	<classpathentry kind="lib" path="lib/scala-library.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.7.jar"/>
+	<classpathentry kind="lib" path="lib/test/guava-18.0.jar"/>
+	<classpathentry kind="lib" path="lib/test/javassist.jar"/>
+	<classpathentry kind="lib" path="lib/test/junit-4.10.jar"/>
+	<classpathentry kind="lib" path="lib/test/reflections-0.9.9-RC1.jar"/>
+	<classpathentry kind="lib" path="lib/test/slf4j-api-1.7.7.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

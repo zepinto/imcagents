@@ -4,22 +4,13 @@
 
 	<path id="classpath.base">
 		<pathelement location="build" />
-		<pathelement location="lib/akka-actor_2.10-2.2.3.jar" />
-		<pathelement location="lib/annprops-1.1.jar" />
-		<pathelement location="lib/config-1.0.2.jar" />
-		<pathelement location="lib/imc-src-5.4.x.jar" />
-		<pathelement location="lib/ini4j-0.5.2.jar" />
-		<pathelement location="lib/scala-library.jar" />
+		<fileset dir="lib" includes="*.jar" />		
 	</path>
 
 	<path id="classpath.test">
-		<pathelement location="${test.dir}" />
-		<pathelement location="lib/junit-4.10.jar" />
-		<pathelement location="lib/reflections-0.9.9-RC1.jar" />
-		<pathelement location="lib/javassist.jar" />
-		<pathelement location="lib/guava-18.0.jar" />
-		<pathelement location="lib/slf4j-api-1.7.7.jar" />
 		<path refid="classpath.base" />
+		<pathelement location="${test.dir}" />
+		<fileset dir="lib/test" includes="*.jar" />
 	</path>
 
 	<target name="compile-test" depends="compile">
