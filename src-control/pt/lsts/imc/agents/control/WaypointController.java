@@ -17,6 +17,7 @@ import pt.lsts.imc.agents.ImcAgent;
 import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.Periodic;
+import pt.lsts.util.WGS84Utilities;
 
 @Agent(name = "Abstract Controller", publishes = { Reference.class,
 		PlanControl.class })
@@ -66,6 +67,20 @@ public abstract class WaypointController extends ImcAgent {
 		return followRefState != null && (followRefState.getProximity() & FollowRefState.PROX_XY_NEAR) != 0;
 	}
 
+	protected double horizontalDistanceTo(double latRads, double lonRads) {
+		if (estimatedState == null)
+			return Double.MAX_VALUE;
+		double[] pos = WGS84Utilities.toLatLonDepth(estimatedState);
+		return WGS84Utilities.distance(pos[0], pos[1], latRads, lonRads);
+	}
+	
+	protected double verticalDistanceTo(double depth) {
+		if (estimatedState == null)
+			return Double.MAX_VALUE;
+		return Math.abs(estimatedState.getDepth() - depth);
+	}
+	
+	
 	protected boolean arrivedZ() {
 		return followRefState != null && (followRefState.getProximity() & FollowRefState.PROX_Z_NEAR) != 0;
 	}
