@@ -303,9 +303,13 @@ public class ImcAgent extends UntypedActor {
 
 				if (handler.getParameterTypes().length == 0) {
 					handler.invoke(this);
-				} else if (Map.class.isAssignableFrom(handler
+				} 
+				else if (Map.class.isAssignableFrom(handler
 						.getParameterTypes()[0])) {
 					handler.invoke(this, (Map<String, String>) evt.getData());
+				}
+				else if (handler.getParameterTypes()[0].equals(Event.class)) {
+					handler.invoke(this, evt);
 				}
 			}
 		}

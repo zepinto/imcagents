@@ -11,6 +11,7 @@ import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.EventHandler;
 import pt.lsts.imc.annotations.Periodic;
+import pt.lsts.util.WGS84Utilities;
 
 @Agent(name="PointSampler", publishes=Event.class)
 public class PointSampler extends WaypointController {
@@ -31,10 +32,11 @@ public class PointSampler extends WaypointController {
 	
 	@Periodic(millisBetweenUpdates=2500)
 	public void printState() {
-		System.out.println(getClass().getSimpleName()+":");
+		System.out.println(getClass().getSimpleName()+"."+vehicle+":");
 		System.out.println("\tState: "+state);
 		System.out.println("\tTarget: "+targetLat+", "+targetLon+", "+targetDepth);
 		System.out.println("\tSample: "+sample);		
+		System.out.println("\tArrived: "+arrived());
 	}
 	
 	@EventHandler("Target")
@@ -62,10 +64,11 @@ public class PointSampler extends WaypointController {
 			switch (state) {
 			case GOTO_POINT:
 				if (sample == -1 && lastState != null) {
-					sample = lastState.getAlt();
-					sampleLat = lastState.getLat();
-					sampleLon = lastState.getLon();
+					double[] pos = WGS84Utilities.toLatLonDepth(lastState);
+					sampleLat = Math.toRadians(pos[0]);
+					sampleLon = Math.toRadians(pos[1]);
 					sampleDepth = lastState.getDepth();
+					sample = lastState.getAlt();					
 				}
 				break;
 			case SURFACING:
@@ -81,8 +84,9 @@ public class PointSampler extends WaypointController {
 		}
 		
 		if (Double.isNaN(targetLat) && lastState != null) {
-			targetLat = lastState.getLat();
-			targetLon = lastState.getLon();
+			double[] pos = WGS84Utilities.toLatLonDepth(lastState);
+			targetLat = Math.toRadians(pos[0]);
+			targetLon = Math.toRadians(pos[1]);
 			targetDepth = 0;
 		}
 		if (!Double.isNaN(targetLat))

@@ -2,9 +2,9 @@
 	print = false
 
 [pt.lsts.imc.agents.net.ImcProtocol]
-	bind_port = 8002
-	local_name = sampler-2
+	bind_port = 8003
+	local_name = sampler-3
 
 [pt.lsts.imc.agents.control.PointSampler]
 	speed = 1.2
-	vehicle = lauv-seacon-2
+	vehicle = lauv-seacon-3

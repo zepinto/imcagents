@@ -56,6 +56,7 @@ public abstract class WaypointController extends ImcAgent {
 
 	@Consume
 	protected final void on(PlanControlState planControlState) {
+		
 		if (!planControlState.getSourceName().equals(vehicle))
 			return;
 		this.planControlState = planControlState;
@@ -82,7 +83,7 @@ public abstract class WaypointController extends ImcAgent {
 				.setZ(new DesiredZ().setZUnits(Z_UNITS.DEPTH).setValue(depth))
 				.setLat(latRadians).setLon(lonRadians).setRadius(0);
 	}
-
+	
 	private PlanControl createStartRequest() {
 
 		FollowReference fref = new FollowReference()
@@ -114,7 +115,8 @@ public abstract class WaypointController extends ImcAgent {
 
 		switch (currentState) {
 		case Connecting:
-			send(vehicle, createStartRequest());
+			if (planControlState != null && planControlState.getState() == PlanControlState.STATE.READY)
+				send(vehicle, createStartRequest());
 			break;
 		case Controlling:
 			Reference wpt = guide();
