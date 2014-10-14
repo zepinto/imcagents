@@ -1,6 +1,5 @@
 package pt.lsts.imc.agents;
 
-import info.zepinto.props.Property;
 import info.zepinto.props.PropertyUtils;
 
 import java.io.File;
@@ -32,8 +31,7 @@ import akka.actor.Props;
  */
 public class AgentContext {
 
-	@Property
-	int uid = 0;
+	private int uid = -1;
 
 	private ActorRef bus;
 	private ActorSystem system;
@@ -103,6 +101,7 @@ public class AgentContext {
 
 		for (Ini.Section section : ini.values()) {
 			String name = section.getName();
+			System.out.println("Parsing section "+name);
 			Properties props = new Properties();
 			for (String option : section.keySet())
 				props.put(option, section.fetch(option));
@@ -137,6 +136,7 @@ public class AgentContext {
 
 		bus.tell(chan, ref);
 		ref.tell(properties, bus);
+		
 		Map<String, Integer> periodicCalls = chan.periodicCalls();
 		for (Entry<String, Integer> entry : periodicCalls.entrySet()) {
 			PeriodicCall call = new PeriodicCall(ref, entry.getKey(),
@@ -190,6 +190,13 @@ public class AgentContext {
 	 */
 	public int getUid() {
 		return uid;
+	}
+
+	/**
+	 * @param uid the uid to set
+	 */
+	public void setUid(int uid) {
+		this.uid = uid;
 	}
 
 	public static void main(String[] args) throws Exception {

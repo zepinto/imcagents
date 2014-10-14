@@ -71,8 +71,6 @@ public abstract class WaypointController extends ImcAgent {
 
 	private PlanControl createStartRequest() {
 		
-		System.out.println("Trying to bind control to "+getSrcId()+"."+getEntityId());
-		
 		FollowReference fref = new FollowReference()
 				.setControlEnt((short) getEntityId()).setControlSrc(getSrcId())
 				.setTimeout(timeout).setLoiterRadius(10);
@@ -81,7 +79,7 @@ public abstract class WaypointController extends ImcAgent {
 				.setPlanId(ctrl_id).setRequestId(0).setArg(fref).setFlags(0);
 	}
 
-	@Periodic(millisBetweenUpdates = 1000)
+	@Periodic(millisBetweenUpdates = 2000)
 	public void update() {
 
 		if (currentState == STATE.Finished) {
@@ -97,8 +95,6 @@ public abstract class WaypointController extends ImcAgent {
 			currentState = STATE.Controlling;
 		}
 		
-		System.out.println("STATE: "+currentState);
-
 		switch (currentState) {
 		case Connecting:
 			send(vehicle, createStartRequest());

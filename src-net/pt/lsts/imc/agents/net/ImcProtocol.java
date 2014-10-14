@@ -8,6 +8,7 @@ import info.zepinto.props.Property;
 import pt.lsts.imc.Announce;
 import pt.lsts.imc.IMCDefinition;
 import pt.lsts.imc.IMCMessage;
+import pt.lsts.imc.agents.AgentContext;
 import pt.lsts.imc.agents.ImcAgent;
 import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.Consume;
@@ -32,7 +33,7 @@ public class ImcProtocol extends ImcAgent {
 	public void init() {
 		super.init();
 		proto = new IMCProtocol(local_name, bind_port);
-		localId = proto.getLocalId();
+		AgentContext.instance().setUid(proto.getLocalId());
 		proto.addMessageListener(
 				new MessageListener<MessageInfo, IMCMessage>() {
 					@Override

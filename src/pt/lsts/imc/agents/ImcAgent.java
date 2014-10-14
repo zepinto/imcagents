@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -32,7 +31,6 @@ import akka.actor.UntypedActor;
  */
 public class ImcAgent extends UntypedActor {
 
-	public static int localId = 0x4000 + new Random().nextInt(0x1FFF);
 	private ActorRef bus;
 	private LinkedHashMap<Class<?>, Method> messageHandlers = new LinkedHashMap<>();
 	private LinkedHashMap<String, Method> eventHandlers = new LinkedHashMap<>();
@@ -109,8 +107,12 @@ public class ImcAgent extends UntypedActor {
 	 *            The message to be dispatched.
 	 */
 	public void send(IMCMessage m) {
+		if (AgentContext.instance().getUid() == -1) {
+			System.err.println("Not yet connected.");
+			return;
+		}
 		m.setTimestampMillis(AgentContext.instance().getTime());
-		m.setSrc(AgentContext.instance().uid);
+		m.setSrc(AgentContext.instance().getUid());
 		m.setSrcEnt(AgentContext.instance().entityOf(getSelf()));
 		if (bus != null)
 			bus.tell(m, getSelf());
@@ -140,11 +142,12 @@ public class ImcAgent extends UntypedActor {
 	 * 
 	 * <pre>
 	 * &#064;Consume
-	 * public void on(Announce ann) { 	
-	 *   sendEvent(&quot;NewLink&quot;, &quot;name&quot;, ann.getSysName(), &quot;type&quot;, ann
-	 * 	   .getSysType().toString());
+	 * public void on(Announce ann) {
+	 * 	sendEvent(&quot;NewLink&quot;, &quot;name&quot;, ann.getSysName(), &quot;type&quot;, ann.getSysType()
+	 * 			.toString());
 	 * }
 	 * </pre>
+	 * 
 	 * @param topic
 	 *            The topic of the event to be send
 	 * @param data
@@ -160,8 +163,10 @@ public class ImcAgent extends UntypedActor {
 				map.put("" + data[i], data[i + 1]);
 
 			send(new Event().setTopic(topic).setData(map));
-		} else
+		} 
+		else {
 			sendEvent(topic);
+		}
 	}
 
 	/**
@@ -248,9 +253,9 @@ public class ImcAgent extends UntypedActor {
 	public int getEntityId() {
 		return AgentContext.instance().entityOf(getSelf());
 	}
-	
+
 	public int getSrcId() {
-		return localId;
+		return AgentContext.instance().getUid();
 	}
 
 	@Override
