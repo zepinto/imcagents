@@ -100,6 +100,19 @@ public class ImcAgent extends UntypedActor {
 	}
 
 	/**
+	 * Post a message to the internal message bus. The source, destination and
+	 * src_ent fields will be left untouched. dispatching the message to other
+	 * actors.
+	 * 
+	 * @param m
+	 *            The message to be dispatched.
+	 */
+	public void postInternally(IMCMessage m) {
+		if (bus != null)
+			bus.tell(m, getSelf());
+	}
+
+	/**
 	 * Send a message to the bus. Internally, the Bus actor will be in charge of
 	 * dispatching the message to other actors.
 	 * 
@@ -163,8 +176,7 @@ public class ImcAgent extends UntypedActor {
 				map.put("" + data[i], data[i + 1]);
 
 			send(new Event().setTopic(topic).setData(map));
-		} 
-		else {
+		} else {
 			sendEvent(topic);
 		}
 	}

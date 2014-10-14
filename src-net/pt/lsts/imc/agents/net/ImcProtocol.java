@@ -45,7 +45,7 @@ public class ImcProtocol extends ImcAgent {
 		proto.addMessageListener(new MessageListener<MessageInfo, IMCMessage>() {
 			@Override
 			public void onMessage(MessageInfo info, IMCMessage msg) {
-				send(msg);
+				postInternally(msg);
 			}
 		});
 	}
@@ -58,7 +58,7 @@ public class ImcProtocol extends ImcAgent {
 
 	@Consume
 	void dispatch(IMCMessage msg) {
-		if (msg.getDst() != 0 || msg.getDst() != 65535) {
+		if (msg.getDst() != 0 && msg.getDst() != 65535) {
 			String name = IMCDefinition.getInstance().getResolver()
 					.resolve(msg.getDst());
 			proto.sendMessage(name, msg);

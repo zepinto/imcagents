@@ -42,36 +42,33 @@ public abstract class WaypointController extends ImcAgent {
 
 	@Consume
 	protected final void on(EstimatedState estate) {
+		if (!estate.getSourceName().equals(vehicle))
+			return;
 		this.estimatedState = estate;
 	}
 
 	@Consume
 	protected final void on(FollowRefState frefstate) {
-		this.followRefState = frefstate;
+		if (!frefstate.getSourceName().equals(vehicle))
+			return;
+		this.followRefState = frefstate;	
 	}
 
 	@Consume
 	protected final void on(PlanControlState planControlState) {
+		if (!planControlState.getSourceName().equals(vehicle))
+			return;
 		this.planControlState = planControlState;
-
-		switch (currentState) {
-		case Connecting:
-			if (planControlState.getPlanId().equals(ctrl_id))
-				break;
-
-		default:
-			break;
-		}
 	}
-	
+
 	protected boolean arrivedXY() {
 		return followRefState != null && (followRefState.getProximity() & FollowRefState.PROX_XY_NEAR) != 0;
 	}
-	
+
 	protected boolean arrivedZ() {
 		return followRefState != null && (followRefState.getProximity() & FollowRefState.PROX_Z_NEAR) != 0;
 	}
-	
+
 	protected boolean arrived() {
 		return arrivedZ() && arrivedXY();
 	}
@@ -79,9 +76,9 @@ public abstract class WaypointController extends ImcAgent {
 	protected Reference waypoint(double latRadians, double lonRadians,
 			double depth, double speed) {
 		return new Reference()
-				.setSpeed(
-						new DesiredSpeed().setSpeedUnits(SPEED_UNITS.METERS_PS)
-								.setValue(speed))
+		.setSpeed(
+				new DesiredSpeed().setSpeedUnits(SPEED_UNITS.METERS_PS)
+				.setValue(speed))
 				.setZ(new DesiredZ().setZUnits(Z_UNITS.DEPTH).setValue(depth))
 				.setLat(latRadians).setLon(lonRadians).setRadius(0);
 	}
@@ -89,8 +86,8 @@ public abstract class WaypointController extends ImcAgent {
 	private PlanControl createStartRequest() {
 
 		FollowReference fref = new FollowReference()
-				.setControlEnt((short) getEntityId()).setControlSrc(getSrcId())
-				.setTimeout(timeout).setLoiterRadius(10);
+		.setControlEnt((short) getEntityId()).setControlSrc(getSrcId())
+		.setTimeout(timeout).setLoiterRadius(10);
 
 		return new PlanControl().setType(TYPE.REQUEST).setOp(OP.START)
 				.setPlanId(ctrl_id).setRequestId(0).setArg(fref).setFlags(0);
@@ -105,10 +102,14 @@ public abstract class WaypointController extends ImcAgent {
 		}
 		if (planControlState == null || followRefState == null) {
 			currentState = STATE.Connecting;
-		} else if (planControlState.getPlanId().equals(ctrl_id)
-				&& followRefState.getControlSrc() == getSrcId()
-				&& followRefState.getControlEnt() == getEntityId()) {
-			currentState = STATE.Controlling;
+		}
+		else {
+
+			if (planControlState.getPlanId().equals(ctrl_id)
+					&& followRefState.getControlSrc() == getSrcId()
+					&& followRefState.getControlEnt() == getEntityId()) {
+				currentState = STATE.Controlling;
+			}
 		}
 
 		switch (currentState) {
@@ -138,7 +139,7 @@ public abstract class WaypointController extends ImcAgent {
 	public void stop() {
 		PlanControl pc = new PlanControl().setPlanId(ctrl_id).setOp(OP.STOP)
 				.setFlags(0).setRequestId(0).setType(TYPE.REQUEST);
-		send(pc);
+		send(vehicle, pc);
 	}
 
 	public abstract Reference guide();

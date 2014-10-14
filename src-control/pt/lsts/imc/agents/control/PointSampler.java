@@ -51,7 +51,8 @@ public class PointSampler extends WaypointController {
 	
 	@Consume
 	public void onState(EstimatedState state) {
-		this.lastState = state;
+		if (state.getSourceName().equals(vehicle))
+			this.lastState = state;
 	}
 	
 	@Override
@@ -68,7 +69,12 @@ public class PointSampler extends WaypointController {
 				}
 				break;
 			case SURFACING:
-				sendEvent("Sample", "value", sample);
+				sendEvent("Sample", 
+						"value", sample, 
+						"lat", sampleLat, 
+						"lon", sampleLon, 
+						"depth", sampleDepth
+					);
 			default:
 				break;
 			}
