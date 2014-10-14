@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -31,6 +32,7 @@ import akka.actor.UntypedActor;
  */
 public class ImcAgent extends UntypedActor {
 
+	public static int localId = 0x4000 + new Random().nextInt(0x1FFF);
 	private ActorRef bus;
 	private LinkedHashMap<Class<?>, Method> messageHandlers = new LinkedHashMap<>();
 	private LinkedHashMap<String, Method> eventHandlers = new LinkedHashMap<>();
@@ -246,10 +248,9 @@ public class ImcAgent extends UntypedActor {
 	public int getEntityId() {
 		return AgentContext.instance().entityOf(getSelf());
 	}
-
+	
 	public int getSrcId() {
-		// FIXME
-		return 0;
+		return localId;
 	}
 
 	@Override

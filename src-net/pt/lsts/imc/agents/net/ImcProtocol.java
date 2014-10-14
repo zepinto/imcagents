@@ -32,6 +32,7 @@ public class ImcProtocol extends ImcAgent {
 	public void init() {
 		super.init();
 		proto = new IMCProtocol(local_name, bind_port);
+		localId = proto.getLocalId();
 		proto.addMessageListener(
 				new MessageListener<MessageInfo, IMCMessage>() {
 					@Override
