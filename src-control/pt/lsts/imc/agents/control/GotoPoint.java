@@ -10,7 +10,6 @@ import pt.lsts.imc.Event;
 import pt.lsts.imc.Reference;
 import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.EventHandler;
-import pt.lsts.imc.annotations.Periodic;
 
 @Agent(name="GotoPoint", publishes=Event.class)
 public class GotoPoint extends WaypointController {
@@ -22,12 +21,6 @@ public class GotoPoint extends WaypointController {
 		.setLon(Math.toRadians(-8))
 		.setSpeed(new DesiredSpeed(1, SPEED_UNITS.METERS_PS))
 		.setZ(new DesiredZ(0, Z_UNITS.DEPTH));
-	}
-	
-	@Periodic(millisBetweenUpdates=5000)
-	public void startControl() {
-		if (currentState != STATE.Controlling)
-			sendEvent("setBehavior", "ctrl_id", ctrl_id);
 	}
 	
 	@EventHandler("LinkCreated")

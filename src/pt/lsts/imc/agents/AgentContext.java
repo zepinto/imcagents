@@ -1,7 +1,5 @@
 package pt.lsts.imc.agents;
 
-import info.zepinto.props.PropertyUtils;
-
 import java.io.File;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -90,12 +88,12 @@ public class AgentContext {
 	 */
 	public void parseConfig(File config) throws Exception {
 		Ini ini = new Ini(config);
-		Ini.Section sec = ini.get("AgentContext");
-		Properties properties = new Properties();
-		for (String option : sec.keySet())
-			properties.put(option, sec.fetch(option));
+//		Ini.Section sec = ini.get("AgentContext");
+//		Properties properties = new Properties();
+//		for (String option : sec.keySet())
+//			properties.put(option, sec.fetch(option));
 
-		PropertyUtils.setProperties(this, properties, false);
+		//PropertyUtils.setProperties(this, properties, false);
 		this.system = ActorSystem.create("IMCAgents");
 		this.bus = system.actorOf(Props.create(MessageBus.class));
 
@@ -200,6 +198,11 @@ public class AgentContext {
 	}
 
 	public static void main(String[] args) throws Exception {
-		new AgentContext(new File("conf/twirl.props"));
+		if (args.length < 1) {
+			System.err.println("Usage: java -jar agents.jar <config>");
+			System.exit(1);
+		}
+		
+		new AgentContext(new File(args[0]));		
 	}
 }
