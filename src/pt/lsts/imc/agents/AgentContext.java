@@ -37,18 +37,26 @@ public class AgentContext {
 
 	private ActorRef bus;
 	private ActorSystem system;
-	
+
 	// real time is the default clock
 	private Clock clock = new RTClock();
 	private Vector<ActorRef> actors = new Vector<>();
-	
+
+	/**
+	 * This method is used to retrieve the locally unique entity id of a given
+	 * actor
+	 * 
+	 * @param actor
+	 *            An actor reference
+	 * @return The entity id (0-255) of this actor
+	 */
 	public int entityOf(ActorRef actor) {
 		if (!actors.contains(actor))
 			actors.add(actor);
 
 		return actors.indexOf(actor) + 1;
 	}
-	
+
 	// Singleton
 	private static AgentContext instance = null;
 
@@ -64,10 +72,24 @@ public class AgentContext {
 		}
 	}
 
+	/**
+	 * Singleton accessor
+	 * 
+	 * @return The singleton instance
+	 */
 	public static AgentContext instance() {
 		return instance;
 	}
 
+	/**
+	 * Given an INI file with a configuration, parses the configuration and
+	 * creates required agents.
+	 * 
+	 * @param config
+	 *            A configuration (ini) file
+	 * @throws Exception
+	 *             In case there is a problem with the file.
+	 */
 	public void parseConfig(File config) throws Exception {
 		Ini ini = new Ini(config);
 		Ini.Section sec = ini.get("AgentContext");
@@ -96,11 +118,20 @@ public class AgentContext {
 			}
 		}
 	}
-	
+
+	/**
+	 * Instantiates and initializes an actor by using Java reflection
+	 * 
+	 * @param c
+	 *            The class of the agent to be created
+	 * @param properties
+	 *            The initial state of the agent
+	 * @return An actor reference to the newly created agent
+	 */
 	public ActorRef bootstrap(Class<?> c, Properties properties) {
 		// Create actor with default initial state
 		ActorRef ref = system.actorOf(Props.create(c));
-		
+
 		// Create an interface for the actor (using the annotations)
 		AgentInterface chan = new AgentInterface(c);
 
@@ -155,7 +186,7 @@ public class AgentContext {
 	}
 
 	/**
-	 * @return the Unique Identifier of this agent context 
+	 * @return the Unique Identifier of this agent context
 	 */
 	public int getUid() {
 		return uid;
