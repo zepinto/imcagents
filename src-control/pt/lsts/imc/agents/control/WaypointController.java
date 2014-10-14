@@ -70,12 +70,15 @@ public abstract class WaypointController extends ImcAgent {
 	}
 
 	private PlanControl createStartRequest() {
+		
+		System.out.println("Trying to bind control to "+getSrcId()+"."+getEntityId());
+		
 		FollowReference fref = new FollowReference()
 				.setControlEnt((short) getEntityId()).setControlSrc(getSrcId())
 				.setTimeout(timeout).setLoiterRadius(10);
 
 		return new PlanControl().setType(TYPE.REQUEST).setOp(OP.START)
-				.setPlanId(ctrl_id).setRequestId(0).setArg(fref);
+				.setPlanId(ctrl_id).setRequestId(0).setArg(fref).setFlags(0);
 	}
 
 	@Periodic(millisBetweenUpdates = 1000)
