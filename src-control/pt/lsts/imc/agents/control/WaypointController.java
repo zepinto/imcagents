@@ -134,6 +134,11 @@ public abstract class WaypointController extends ImcAgent {
 				send(vehicle, createStartRequest());
 			break;
 		case Controlling:
+			if (planControlState.getState() != PlanControlState.STATE.EXECUTING || !planControlState.getPlanId().equals(ctrl_id)) {
+				currentState = STATE.Connecting;
+				break;
+			}
+				
 			Reference wpt = guide();
 			if (wpt == null || (wpt.getFlags() & Reference.FLAG_MANDONE) != 0) {
 				currentState = STATE.Finished;
@@ -157,6 +162,10 @@ public abstract class WaypointController extends ImcAgent {
 		PlanControl pc = new PlanControl().setPlanId(ctrl_id).setOp(OP.STOP)
 				.setFlags(0).setRequestId(0).setType(TYPE.REQUEST);
 		send(vehicle, pc);
+	}
+	
+	public boolean isControlling() {
+		return currentState == STATE.Controlling;
 	}
 
 	public abstract Reference guide();

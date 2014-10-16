@@ -4,7 +4,6 @@ import info.zepinto.props.Property;
 
 import java.util.Map;
 
-import pt.lsts.imc.Abort;
 import pt.lsts.imc.EstimatedState;
 import pt.lsts.imc.Event;
 import pt.lsts.imc.Reference;
@@ -56,15 +55,15 @@ public class PointSampler extends WaypointController {
 
 	}
 
-//	@Periodic(millisBetweenUpdates = 2500)
-//	public void printState() {
-//		System.out.println(getClass().getSimpleName() + "." + vehicle + ":");
-//		System.out.println("\tState: " + state);
-//		System.out.println("\tTarget: " + targetLat + ", " + targetLon + ", "
-//				+ targetDepth);
-//		System.out.println("\tSample: " + sample);
-//		System.out.println("\tArrived: " + arrived());
-//	}
+	@Periodic(millisBetweenUpdates = 2500)
+	public void printState() {
+		System.out.println(getClass().getSimpleName() + "." + vehicle + ":");
+		System.out.println("\tState: " + state);
+		System.out.println("\tTarget: " + targetLat + ", " + targetLon + ", "
+				+ targetDepth);
+		System.out.println("\tSample: " + sample);
+		System.out.println("\tArrived: " + arrived());
+	}
 
 	@EventHandler("Target")
 	public void receiveTarget(Map<String, ?> data) {
@@ -83,8 +82,10 @@ public class PointSampler extends WaypointController {
 
 	@Consume
 	public void onState(EstimatedState state) {
-		if (state.getSourceName().equals(vehicle))
+		if (state.getSourceName().equals(vehicle)) {
 			this.lastState = state;
+			
+		}
 	}
 
 	@Override

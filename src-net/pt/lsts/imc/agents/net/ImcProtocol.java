@@ -63,7 +63,7 @@ public class ImcProtocol extends ImcAgent {
 		boolean reliably = msg.getInteger("__reliable") != 0;
 		
 		if (reliably) {
-			System.out.println("Send message of type "+msg.getAbbrev()+" reliably to "+msg.getString("__dst")+" in less than "+msg.getInteger("__timeout")+" milliseconds.");
+			System.out.println("[IMCProtocol] Send message of type "+msg.getAbbrev()+" reliably to "+msg.getString("__dst")+" in less than "+msg.getInteger("__timeout")+" milliseconds.");
 			try {
 				proto.sendReliably(msg.getString("__dst"), msg, msg.getInteger("__timeout"));
 				getSender().tell(new DeliveryResult(msg, null), self());
