@@ -1,4 +1,4 @@
-package pt.lsts.imc.agents.fsm;
+package pt.lsts.imc.annotations;
 
 public @interface Transition {
 	String to();

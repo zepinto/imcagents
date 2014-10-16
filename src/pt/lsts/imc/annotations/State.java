@@ -1,4 +1,4 @@
-package pt.lsts.imc.agents.fsm;
+package pt.lsts.imc.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface State {	
-	boolean initial() default false;
+public @interface State {
 	Transition[] value() default {};
 }
