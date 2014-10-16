@@ -4,6 +4,7 @@ import info.zepinto.props.Property;
 
 import java.util.Map;
 
+import pt.lsts.imc.Abort;
 import pt.lsts.imc.EstimatedState;
 import pt.lsts.imc.Event;
 import pt.lsts.imc.Reference;

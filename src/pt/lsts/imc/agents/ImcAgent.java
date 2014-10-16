@@ -8,19 +8,27 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import pt.lsts.imc.Event;
 import pt.lsts.imc.IMCDefinition;
 import pt.lsts.imc.IMCMessage;
+import pt.lsts.imc.agents.net.DeliveryResult;
+import pt.lsts.imc.agents.net.ImcProtocol;
 import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.EventHandler;
 import pt.lsts.imc.annotations.Periodic;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import akka.pattern.Patterns;
 
 /**
  * This class is extended by all IMC agents (agents that exchange IMC messages
@@ -35,6 +43,7 @@ public class ImcAgent extends UntypedActor {
 	private LinkedHashMap<Class<?>, Method> messageHandlers = new LinkedHashMap<>();
 	private LinkedHashMap<String, Method> eventHandlers = new LinkedHashMap<>();
 
+	private static int reliable_id = 1;
 	// Initialization block that uses introspection to build message handlers
 	// structure
 	{
@@ -129,6 +138,29 @@ public class ImcAgent extends UntypedActor {
 		m.setSrcEnt(AgentContext.instance().entityOf(getSelf()));
 		if (bus != null)
 			bus.tell(m, getSelf());
+	}
+
+	public void sendReliably(String destination, IMCMessage m, long timeoutMillis) throws Exception {
+		if (AgentContext.instance().getUid() == -1) {
+			System.err.println("Not yet connected.");
+			return;
+		}
+		m.setTimestampMillis(AgentContext.instance().getTime());
+		m.setSrc(AgentContext.instance().getUid());
+		m.setSrcEnt(AgentContext.instance().entityOf(getSelf()));
+		m.setValue("__reliable", reliable_id++);
+		m.setValue("__dst", destination);
+		m.setValue("__timeout", timeoutMillis);
+		List<ActorRef> imcAgents = AgentContext.instance().actorsOfClass(ImcProtocol.class);
+		if (imcAgents == null || imcAgents.isEmpty())
+			throw new Exception("No agent is capable of delivering the message");
+		
+		ActorRef ref = imcAgents.get(0);
+		Future<Object> result = Patterns.ask(ref, m, timeoutMillis);
+		DeliveryResult r = (DeliveryResult) Await.result(result,
+				Duration.create(timeoutMillis, TimeUnit.MILLISECONDS));
+		if (!r.isSuccess())
+			r.getException();
 	}
 
 	/**
@@ -303,12 +335,10 @@ public class ImcAgent extends UntypedActor {
 
 				if (handler.getParameterTypes().length == 0) {
 					handler.invoke(this);
-				} 
-				else if (Map.class.isAssignableFrom(handler
+				} else if (Map.class.isAssignableFrom(handler
 						.getParameterTypes()[0])) {
 					handler.invoke(this, (Map<String, String>) evt.getData());
-				}
-				else if (handler.getParameterTypes()[0].equals(Event.class)) {
+				} else if (handler.getParameterTypes()[0].equals(Event.class)) {
 					handler.invoke(this, evt);
 				}
 			}

@@ -1,6 +1,10 @@
 package pt.lsts.imc.agents;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -31,6 +35,8 @@ public class AgentContext {
 
 	private int uid = -1;
 
+	private LinkedHashMap<Class<?>, List<ActorRef>> actorsByClass = new LinkedHashMap<Class<?>, List<ActorRef>>();
+	
 	private ActorRef bus;
 	private ActorSystem system;
 
@@ -88,18 +94,11 @@ public class AgentContext {
 	 */
 	public void parseConfig(File config) throws Exception {
 		Ini ini = new Ini(config);
-//		Ini.Section sec = ini.get("AgentContext");
-//		Properties properties = new Properties();
-//		for (String option : sec.keySet())
-//			properties.put(option, sec.fetch(option));
-
-		//PropertyUtils.setProperties(this, properties, false);
 		this.system = ActorSystem.create("IMCAgents");
 		this.bus = system.actorOf(Props.create(MessageBus.class));
 
 		for (Ini.Section section : ini.values()) {
 			String name = section.getName();
-			System.out.println("Parsing section "+name);
 			Properties props = new Properties();
 			for (String option : section.keySet())
 				props.put(option, section.fetch(option));
@@ -129,6 +128,11 @@ public class AgentContext {
 		// Create actor with default initial state
 		ActorRef ref = system.actorOf(Props.create(c));
 
+		if (!actorsByClass.containsKey(c))
+			actorsByClass.put(c, new ArrayList<ActorRef>());
+		
+		actorsByClass.get(c).add(ref);
+		
 		// Create an interface for the actor (using the annotations)
 		AgentInterface chan = new AgentInterface(c);
 
@@ -146,6 +150,12 @@ public class AgentContext {
 							TimeUnit.MILLISECONDS), call, system.dispatcher());
 		}
 		return ref;
+	}
+	
+	public List<ActorRef> actorsOfClass(Class<?> c) {
+		if (actorsByClass.containsKey(c))
+			return Collections.unmodifiableList(actorsByClass.get(c));
+		return new ArrayList<ActorRef>();
 	}
 
 	/**
