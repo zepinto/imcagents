@@ -19,8 +19,11 @@ import java.util.zip.ZipOutputStream;
 import pt.lsts.imc.Event;
 import pt.lsts.imc.IMCDefinition;
 import pt.lsts.imc.IMCMessage;
+import pt.lsts.imc.LogBookEntry;
+import pt.lsts.imc.LogBookEntry.TYPE;
 import pt.lsts.imc.agents.net.DeliveryResult;
 import pt.lsts.imc.agents.net.ImcProtocol;
+import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.EventHandler;
 import pt.lsts.imc.annotations.Periodic;
@@ -38,6 +41,7 @@ import akka.pattern.Patterns;
  * @author zp
  *
  */
+@Agent(name="IMCAgent", publishes=LogBookEntry.class)
 public class ImcAgent extends UntypedActor {
 
 	private ActorRef bus;
@@ -376,5 +380,33 @@ public class ImcAgent extends UntypedActor {
 		}
 		// If there is no handler for this type of message, signal that back
 		unhandled(msg);
+	}
+	
+	private void log(TYPE type, String text) {
+		send(new LogBookEntry()
+		.setContext(getClass().getSimpleName())
+		.setHtime(AgentContext.instance().getTime() / 1000.0)
+		.setType(type)
+		.setText(text));
+	}
+	
+	public void inf(String text) {
+		log(TYPE.INFO, text);
+	}
+	
+	public void war(String text) {
+		log(TYPE.WARNING, text);
+	}
+	
+	public void debug(String text) {
+		log(TYPE.DEBUG, text);
+	}
+	
+	public void err(String text) {
+		log(TYPE.ERROR, text);
+	}
+	
+	public void critical(String text) {
+		log(TYPE.CRITICAL, text);
 	}
 }

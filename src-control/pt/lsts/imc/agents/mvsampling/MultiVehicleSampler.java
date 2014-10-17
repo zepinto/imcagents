@@ -52,7 +52,7 @@ public class MultiVehicleSampler extends FSMAgent {
 			// slaves are always added at the beginning
 			slaves.add(0, msg.getSourceName());
 
-		System.out.println("I have " + slaves.size() + " slaves: " + slaves);
+		debug("I have " + slaves.size() + " slaves: " + slaves);
 	}
 
 	@EventHandler("Sample")
@@ -64,8 +64,7 @@ public class MultiVehicleSampler extends FSMAgent {
 	@InitialState
 	public void discoverSamplers() {
 		if (slaves.size() >= requiredSamplers && myself != null) {
-			System.out
-			.println("Minimum number of samplers met. Will now send targets.");
+			war("Minimum number of samplers met. Will now send targets.");
 			transition("distributeTargets", "SamplersFound");
 		}
 	}
@@ -79,17 +78,21 @@ public class MultiVehicleSampler extends FSMAgent {
 			double maxSample = -Double.MAX_VALUE;
 
 			for (Entry<String, Event> entry : samples.entrySet()) {
-				double sample = Double.parseDouble(entry.getValue().getData().get("value"));
+				double sample = Double.parseDouble(entry.getValue().getData()
+						.get("value"));
 				if (sample > maxSample) {
 					maxSample = sample;
-					centerLat = Double.parseDouble(entry.getValue().getData().get("lat"));
-					centerLon = Double.parseDouble(entry.getValue().getData().get("lon"));
+					centerLat = Double.parseDouble(entry.getValue().getData()
+							.get("lat"));
+					centerLon = Double.parseDouble(entry.getValue().getData()
+							.get("lon"));
 				}
 			}
 		}
-		
-		System.out.println("Surveying around ("+centerLat+", "+centerLon+")");
-		
+
+		war("Surveying around (" + centerLat + ", " + centerLon
+				+ ")");
+
 		for (int i = 0; i < requiredSamplers; i++) {
 			double offsetX = Math.cos(angle * i) * cellWidth;
 			double offsetY = Math.sin(angle * i) * cellWidth;
@@ -100,8 +103,7 @@ public class MultiVehicleSampler extends FSMAgent {
 					.toRadians(pos[1])));
 		}
 
-		System.out.println("Generated " + points.size() + " waypoints: "
-				+ points);
+		war("Generated " + points.size() + " waypoints: " + points);
 
 		return points;
 	}
@@ -113,25 +115,25 @@ public class MultiVehicleSampler extends FSMAgent {
 		List<Point2D> wpts = generateNextWaypoints();
 		samples.clear();
 
-		for (int i = 0; i < wpts.size(); ) {
+		for (int i = 0; i < wpts.size();) {
 			try {
-				sendEventReliably("Target", slaves.get(i), 300, "lat", wpts.get(i)
-						.getX(), "lon", wpts.get(i).getY(), "depth", surveyDepth+i);
+				sendEventReliably("Target", slaves.get(i), 300, "lat", wpts
+						.get(i).getX(), "lon", wpts.get(i).getY(), "depth",
+						surveyDepth + i);
 				i++;
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
-		System.out.println("Sent all targets.");
+		war("Sent all targets.");
 		transition("waitForSamples", "TargetsSent");
 	}
 
 	@State
 	public void waitForSamples() {
 		if (samples.size() == requiredSamplers) {
-			System.out.println("got all samples. moving on.");
+			war("got all samples. moving on.");
 			transition("distributeTargets", "SamplesReceived");
 		}
 	}

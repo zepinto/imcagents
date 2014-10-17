@@ -68,7 +68,7 @@ public class FSMAgent extends ImcAgent {
 
 	@Periodic(millisBetweenUpdates = 1000)
 	public void update() {
-		System.out.println("FSM: "+curState);
+		debug("FSM state: "+curState);
 		if (!states.containsKey(curState)) {
 			System.err.println("State machine entered invalid state: "
 					+ curState);

@@ -3,7 +3,10 @@ package pt.lsts.imc.agents.mvsampling;
 import info.zepinto.props.Property;
 import pt.lsts.imc.EstimatedState;
 import pt.lsts.imc.Event;
+import pt.lsts.imc.LogBookEntry;
+import pt.lsts.imc.LogBookEntry.TYPE;
 import pt.lsts.imc.Reference;
+import pt.lsts.imc.agents.AgentContext;
 import pt.lsts.imc.agents.control.WaypointController;
 import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.Consume;
@@ -50,7 +53,6 @@ public class PointSampler extends WaypointController {
 					state = FSM_STATE.READY;
 				}
 				catch (Exception e) {
-					System.err.println("Error sending sample, will retry in 2 seconds.");
 				}
 				
 			default:
@@ -60,13 +62,19 @@ public class PointSampler extends WaypointController {
 	}
 
 	@Periodic(millisBetweenUpdates = 2500)
-	public void printState() {
-		System.out.println(getClass().getSimpleName() + "." + vehicle + ":");
-		System.out.println("\tState: " + state);
-		System.out.println("\tTarget: " + targetLat + ", " + targetLon + ", "
-				+ targetDepth);
-		System.out.println("\tSample: " + sample);
-		System.out.println("\tArrived: " + arrived());
+	public void logState() {
+		
+		StringBuilder sb = new StringBuilder("State: " + state+" :: ");
+		sb.append("Target: (" + targetLat + ", " + targetLon + ", "
+				+ targetDepth+") :: ");
+		sb.append("Sample: " + sample+" :: ");
+		sb.append("Arrived: " + arrived());
+		send(new LogBookEntry()
+				.setContext(getClass().getSimpleName() + "." + vehicle)
+				.setHtime(AgentContext.instance().getTime() / 1000.0)
+				.setType(TYPE.DEBUG)
+				.setText(sb.toString())
+				);
 	}
 
 	@EventHandler("Target")
@@ -81,7 +89,7 @@ public class PointSampler extends WaypointController {
 		// 	sample is now indeterminate
 		sample = sampleDepth = sampleLat = sampleLon = -1;
 
-		System.out.println("Received target... now going there.");
+		inf("Received target... now going there.");
 		
 		state = FSM_STATE.GOING;
 		send(vehicle, guide());

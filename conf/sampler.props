@@ -1,13 +1,16 @@
 [pt.lsts.imc.agents.sim.Logger]
 	print = false
 
+[pt.lsts.imc.agents.sim.LogBookDisplay]
+
 [pt.lsts.imc.agents.net.ImcProtocol]
 	bind_port = 8001
 	local_name = sampler-1
 
 [pt.lsts.imc.agents.mvsampling.PointSampler]
 	speed = 1.2
-	vehicle = lauv-seacon-1
+	vehicle = lauv-noptilus-1
 
 [pt.lsts.imc.agents.mvsampling.MultiVehicleSampler]
 	requiredSamplers = 3
+	
