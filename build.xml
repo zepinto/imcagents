@@ -40,5 +40,18 @@
 			<classpath refid="classpath.base"/>
 		</javac>
 	</target>
-
+	
+	<target name="jar" depends="compile">
+		<unjar src="lib/akka-actor_2.10-2.2.3.jar" dest="build"/>
+		<unjar src="lib/annprops-1.1.jar" dest="build"/>
+		<unjar src="lib/config-1.0.2.jar" dest="build"/>
+		<unjar src="lib/ini4j-0.5.2.jar" dest="build"/>
+		<unjar src="lib/libimc.jar" dest="build"/>
+		<unjar src="lib/scala-library.jar" dest="build"/>
+		<jar destfile="agents.jar" basedir="build" index="true">
+			<manifest>
+		         <attribute name="Main-Class" value="pt.lsts.imc.agents.AgentContext"/>
+		    </manifest>
+		</jar>
+	</target>
 </project>
