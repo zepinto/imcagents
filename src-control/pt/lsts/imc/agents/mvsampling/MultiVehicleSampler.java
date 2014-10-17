@@ -6,6 +6,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import pt.lsts.imc.Event;
 import pt.lsts.imc.agents.FSMAgent;
@@ -25,7 +26,7 @@ public class MultiVehicleSampler extends FSMAgent {
 	private double cellWidth = 50;
 
 	@Property
-	private double surveyDepth = 3;
+	private double surveyDepth = 1;
 
 	private ArrayList<String> slaves = new ArrayList<String>();
 	private String myself = null;
@@ -64,7 +65,7 @@ public class MultiVehicleSampler extends FSMAgent {
 	public void discoverSamplers() {
 		if (slaves.size() >= requiredSamplers && myself != null) {
 			System.out
-					.println("Minimum number of samplers met. Will now send targets.");
+			.println("Minimum number of samplers met. Will now send targets.");
 			transition("distributeTargets", "SamplersFound");
 		}
 	}
@@ -72,28 +73,31 @@ public class MultiVehicleSampler extends FSMAgent {
 	private List<Point2D> generateNextWaypoints() {
 		double angle = (Math.PI * 2) / requiredSamplers;
 		ArrayList<Point2D> points = new ArrayList<Point2D>();
+		double centerLat = myLat, centerLon = myLon;
 
-		if (samples.isEmpty()) {
-			// initial point
-			for (int i = 0; i < requiredSamplers; i++) {
-				double offsetX = Math.cos(angle * i) * cellWidth;
-				double offsetY = Math.sin(angle * i) * cellWidth;
+		if (!samples.isEmpty()) {
+			double maxSample = -Double.MAX_VALUE;
 
-				double[] pos = WGS84Utilities.WGS84displace(myLat, myLon,
-						surveyDepth, offsetX, offsetY, 0);
-				points.add(new Point2D.Double(Math.toRadians(pos[0]), Math
-						.toRadians(pos[1])));
+			for (Entry<String, Event> entry : samples.entrySet()) {
+				double sample = Double.parseDouble(entry.getValue().getData().get("value"));
+				if (sample > maxSample) {
+					maxSample = sample;
+					centerLat = Double.parseDouble(entry.getValue().getData().get("lat"));
+					centerLon = Double.parseDouble(entry.getValue().getData().get("lon"));
+				}
 			}
-		} else {
-			// FIXME check highest value from samples and generate based on that
-			for (int i = 0; i < requiredSamplers; i++) {
-				double offsetX = Math.cos(angle * i) * cellWidth;
-				double offsetY = Math.sin(angle * i) * cellWidth;
-				double[] pos = WGS84Utilities.WGS84displace(myLat, myLon,
-						surveyDepth, offsetX, offsetY, 0);
-				points.add(new Point2D.Double(Math.toRadians(pos[0]), Math
-						.toRadians(pos[1])));
-			}
+		}
+		
+		System.out.println("Surveying around ("+centerLat+", "+centerLon+")");
+		
+		for (int i = 0; i < requiredSamplers; i++) {
+			double offsetX = Math.cos(angle * i) * cellWidth;
+			double offsetY = Math.sin(angle * i) * cellWidth;
+
+			double[] pos = WGS84Utilities.WGS84displace(centerLat, centerLon,
+					surveyDepth, offsetX, offsetY, 0);
+			points.add(new Point2D.Double(Math.toRadians(pos[0]), Math
+					.toRadians(pos[1])));
 		}
 
 		System.out.println("Generated " + points.size() + " waypoints: "
@@ -111,8 +115,8 @@ public class MultiVehicleSampler extends FSMAgent {
 
 		for (int i = 0; i < wpts.size(); ) {
 			try {
-				sendEventReliably("Target", slaves.get(i), 1000, "lat", wpts.get(i)
-					.getX(), "lon", wpts.get(i).getY(), "depth", surveyDepth);
+				sendEventReliably("Target", slaves.get(i), 300, "lat", wpts.get(i)
+						.getX(), "lon", wpts.get(i).getY(), "depth", surveyDepth+i);
 				i++;
 			}
 			catch (Exception e) {

@@ -155,7 +155,7 @@ public class ImcAgent extends UntypedActor {
 		ActorRef ref = imcAgents.get(0);
 		Future<Object> result = Patterns.ask(ref, m, timeoutMillis);
 		DeliveryResult r = (DeliveryResult) Await.result(result,
-				Duration.create(timeoutMillis, TimeUnit.MILLISECONDS));
+				Duration.create(timeoutMillis*2, TimeUnit.MILLISECONDS));
 		if (!r.isSuccess())
 			r.getException();
 	}

@@ -1,9 +1,6 @@
 package pt.lsts.imc.agents.mvsampling;
 
 import info.zepinto.props.Property;
-
-import java.util.Map;
-
 import pt.lsts.imc.EstimatedState;
 import pt.lsts.imc.Event;
 import pt.lsts.imc.Reference;
@@ -22,10 +19,12 @@ public class PointSampler extends WaypointController {
 
 	private double targetLat = Double.NaN, targetLon = Double.NaN,
 			targetDepth = Double.NaN;
+	
+	private String myMaster = null;
 	private EstimatedState lastState = null;
 
 	private enum FSM_STATE {
-		READY, GOING, DONE
+		READY, GOING, SEND_SAMPLE
 	};
 
 	private FSM_STATE state = FSM_STATE.READY;
@@ -44,11 +43,16 @@ public class PointSampler extends WaypointController {
 				sendEvent("Going", "name", vehicle, "lat",
 						Math.toRadians(pos[0]), "lon", Math.toRadians(pos[1]));
 				break;
-			case DONE:
-				sendEvent("Ready", "name", vehicle, "lat",
-						Math.toRadians(pos[0]), "lon", Math.toRadians(pos[1]));
-				sendEvent("Sample", "name", vehicle, "value", sample, "lat", sampleLat, "lon",
-						sampleLon, "depth", sampleDepth);
+			case SEND_SAMPLE:
+				try {
+					sendEventReliably("Sample", myMaster, 500, "name", vehicle, "value", sample, "lat", sampleLat, "lon",
+							sampleLon, "depth", sampleDepth);
+					state = FSM_STATE.READY;
+				}
+				catch (Exception e) {
+					System.err.println("Error sending sample, will retry in 2 seconds.");
+				}
+				
 			default:
 				break;
 			}
@@ -66,10 +70,13 @@ public class PointSampler extends WaypointController {
 	}
 
 	@EventHandler("Target")
-	public void receiveTarget(Map<String, ?> data) {
-		this.targetLat = Double.parseDouble("" + data.get("lat"));
-		this.targetLon = Double.parseDouble("" + data.get("lon"));
-		this.targetDepth = Double.parseDouble("" + data.get("depth"));
+	public void receiveTarget(Event target) {
+		
+		myMaster = target.getSourceName();
+		
+		this.targetLat = Double.parseDouble("" + target.getData().get("lat"));
+		this.targetLon = Double.parseDouble("" + target.getData().get("lon"));
+		this.targetDepth = Double.parseDouble("" + target.getData().get("depth"));
 
 		// 	sample is now indeterminate
 		sample = sampleDepth = sampleLat = sampleLon = -1;
@@ -99,17 +106,14 @@ public class PointSampler extends WaypointController {
 			}						
 			break;
 		case GOING:
-			System.out.println(arrivedZ()+" , "+horizontalDistanceTo(targetLat, targetLon));
 			if (arrivedZ() && horizontalDistanceTo(targetLat, targetLon) < 10) {
 				double[] pos = WGS84Utilities.toLatLonDepth(lastState);
-				sampleLat = Math.toRadians(pos[0]);
-				sampleLon = Math.toRadians(pos[1]);
+				sampleLat = pos[0];
+				sampleLon = pos[1];
 				sampleDepth = lastState.getDepth();
-				sample = lastState.getAlt();
-				targetLat = Math.toRadians(pos[0]);
-				targetLon = Math.toRadians(pos[1]);
+				sample = lastState.getAlt() + lastState.getDepth();
 				targetDepth = 0;
-				state = FSM_STATE.DONE;
+				state = FSM_STATE.SEND_SAMPLE;
 			}
 			break;
 		default:
