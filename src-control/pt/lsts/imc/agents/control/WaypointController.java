@@ -24,13 +24,13 @@ import pt.lsts.util.WGS84Utilities;
 public abstract class WaypointController extends ImcAgent {
 
 	@Property
-	String vehicle = null;
+	protected String vehicle = null;
 
 	@Property
-	String ctrl_id = getClass().getSimpleName();
+	protected String ctrl_id = getClass().getSimpleName();
 
 	@Property
-	int timeout = 30;
+	protected int timeout = 30;
 
 	protected enum STATE {
 		Idle, Connecting, Controlling, Finished

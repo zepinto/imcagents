@@ -35,7 +35,9 @@ public class FSMAgent extends ImcAgent {
 				if (initial != null)
 					System.err
 							.println("More than one initial states have been defined!");
-				initial = m.getName();
+				else {
+					initial = m.getName();				
+				}
 			}
 
 			transitions.put(m.getName(),
@@ -48,7 +50,7 @@ public class FSMAgent extends ImcAgent {
 			System.err
 					.println("No initial state defined. Mark one state as initial by annotating it with @InitialState.");
 
-		System.out.println(states);
+		curState = initial;
 	}
 
 	public final void transition(String newState, String event) {
@@ -66,6 +68,7 @@ public class FSMAgent extends ImcAgent {
 
 	@Periodic(millisBetweenUpdates = 1000)
 	public void update() {
+		System.out.println("FSM: "+curState);
 		if (!states.containsKey(curState)) {
 			System.err.println("State machine entered invalid state: "
 					+ curState);

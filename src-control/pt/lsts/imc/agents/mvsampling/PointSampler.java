@@ -1,4 +1,4 @@
-package pt.lsts.imc.agents.control;
+package pt.lsts.imc.agents.mvsampling;
 
 import info.zepinto.props.Property;
 
@@ -7,6 +7,7 @@ import java.util.Map;
 import pt.lsts.imc.EstimatedState;
 import pt.lsts.imc.Event;
 import pt.lsts.imc.Reference;
+import pt.lsts.imc.agents.control.WaypointController;
 import pt.lsts.imc.annotations.Agent;
 import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.EventHandler;

@@ -5,6 +5,6 @@
 	bind_port = 8003
 	local_name = sampler-3
 
-[pt.lsts.imc.agents.control.PointSampler]
+[pt.lsts.imc.agents.mvsampling.PointSampler]
 	speed = 1.2
 	vehicle = lauv-seacon-3
