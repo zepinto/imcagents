@@ -5,6 +5,7 @@ import info.zepinto.props.PropertyUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -40,8 +41,8 @@ import akka.pattern.Patterns;
 public class ImcAgent extends UntypedActor {
 
 	private ActorRef bus;
-	private LinkedHashMap<Class<?>, Method> messageHandlers = new LinkedHashMap<>();
-	private LinkedHashMap<String, Method> eventHandlers = new LinkedHashMap<>();
+	private LinkedHashMap<Class<?>, List<Method>> messageHandlers = new LinkedHashMap<>();
+	private LinkedHashMap<String, List<Method>> eventHandlers = new LinkedHashMap<>();
 
 	private static int reliable_id = 1;
 	// Initialization block that uses introspection to build message handlers
@@ -62,13 +63,11 @@ public class ImcAgent extends UntypedActor {
 				if (params.length != 1)
 					continue;
 
-				// If there is subclass already handling these events, do not
-				// override it
-				if (messageHandlers.containsKey(params[0]))
-					continue;
+				if (!messageHandlers.containsKey(params[0]))
+					messageHandlers.put(params[0], new ArrayList<Method>());
 
 				m.setAccessible(true);
-				messageHandlers.put(params[0], m);
+				messageHandlers.get(params[0]).add(m);
 			}
 
 			for (Method m : methods) {
@@ -81,13 +80,11 @@ public class ImcAgent extends UntypedActor {
 				if (params.length > 1)
 					continue;
 
-				// If there is subclass already handling these events, do not
-				// override it
-				if (eventHandlers.containsKey(event))
-					continue;
+				if (!eventHandlers.containsKey(event))
+					eventHandlers.put(event, new ArrayList<Method>());
 
 				m.setAccessible(true);
-				eventHandlers.put(event, m);
+				eventHandlers.get(event).add(m);
 			}
 		}
 	}
@@ -212,6 +209,15 @@ public class ImcAgent extends UntypedActor {
 			sendEvent(topic);
 		}
 	}
+	
+	public void sendEventReliably(String topic, String destination, long timeoutMillis, Object... data) throws Exception {
+		LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+		if (data != null) {
+			for (int i = 0; i < data.length - 1; i += 2)
+				map.put("" + data[i], data[i + 1]);
+		}
+		sendReliably(destination, new Event().setTopic(topic).setData(map), timeoutMillis);		
+	}
 
 	/**
 	 * Creates and sends message of type {@link Event} with given topic and no
@@ -331,16 +337,18 @@ public class ImcAgent extends UntypedActor {
 		if (msg instanceof Event) {
 			Event evt = (Event) msg;
 			if (eventHandlers.containsKey(evt.getTopic())) {
-				Method handler = eventHandlers.get(evt.getTopic());
+				List<Method> handlers = eventHandlers.get(evt.getTopic());
 
-				if (handler.getParameterTypes().length == 0) {
-					handler.invoke(this);
-				} else if (Map.class.isAssignableFrom(handler
-						.getParameterTypes()[0])) {
-					handler.invoke(this, (Map<String, String>) evt.getData());
-				} else if (handler.getParameterTypes()[0].equals(Event.class)) {
-					handler.invoke(this, evt);
-				}
+				for (Method handler : handlers) {
+					if (handler.getParameterTypes().length == 0) {
+						handler.invoke(this);
+					} else if (Map.class.isAssignableFrom(handler
+							.getParameterTypes()[0])) {
+						handler.invoke(this, (Map<String, String>) evt.getData());
+					} else if (handler.getParameterTypes()[0].equals(Event.class)) {
+						handler.invoke(this, evt);
+					}
+				}				
 			}
 		}
 
@@ -348,8 +356,11 @@ public class ImcAgent extends UntypedActor {
 		if (msg instanceof IMCMessage) {
 			Class<?> clazz = msg.getClass();
 			while (clazz != IMCMessage.class) {
-				if (messageHandlers.containsKey(clazz)) {
-					messageHandlers.get(clazz).invoke(this, msg);
+				if (messageHandlers.containsKey(clazz)) {					
+					for (Method m : messageHandlers.get(clazz)) {
+						m.invoke(this, msg);	
+					}					
+					
 					return;
 				}
 				clazz = clazz.getSuperclass();
@@ -357,7 +368,9 @@ public class ImcAgent extends UntypedActor {
 
 			// Check if there is a "generic" message handler
 			if (messageHandlers.containsKey(IMCMessage.class)) {
-				messageHandlers.get(IMCMessage.class).invoke(this, msg);
+				for (Method m : messageHandlers.get(IMCMessage.class)) {
+					m.invoke(this, msg);	
+				}	
 				return;
 			}
 		}

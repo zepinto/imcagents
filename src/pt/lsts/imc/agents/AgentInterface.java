@@ -57,6 +57,7 @@ public class AgentInterface {
 				Periodic p = m.getAnnotation(Periodic.class);
 				EventHandler ev = m.getAnnotation(EventHandler.class);
 				
+				
 				if (cons != null) {
 					Class<?>[] params = m.getParameterTypes();
 					if (params.length != 1)
@@ -76,6 +77,7 @@ public class AgentInterface {
 				}
 			}
 		}
+		System.out.println(agentClass.getSimpleName()+" listens to "+messagesToListen+" and produces "+messagesProduced);
 	}
 
 	/**
@@ -114,9 +116,11 @@ public class AgentInterface {
 	}
 
 	private static Collection<Method> getMethods(Class<?> clazz) {
+		
 		HashSet<Method> methods = new HashSet<>();
 		methods.addAll(Arrays.asList(clazz.getMethods()));
 		methods.addAll(Arrays.asList(clazz.getDeclaredMethods()));
+		
 		return methods;
 	}
 

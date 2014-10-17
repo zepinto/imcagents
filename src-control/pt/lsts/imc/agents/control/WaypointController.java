@@ -52,37 +52,40 @@ public abstract class WaypointController extends ImcAgent {
 	protected final void on(FollowRefState frefstate) {
 		if (!frefstate.getSourceName().equals(vehicle))
 			return;
-		this.followRefState = frefstate;	
+		this.followRefState = frefstate;
 	}
 
 	@Consume
 	protected final void on(PlanControlState planControlState) {
-		
+
 		if (!planControlState.getSourceName().equals(vehicle))
 			return;
 		this.planControlState = planControlState;
 	}
 
 	protected boolean arrivedXY() {
-		return followRefState != null && (followRefState.getProximity() & FollowRefState.PROX_XY_NEAR) != 0;
+		return followRefState != null
+				&& (followRefState.getProximity() & FollowRefState.PROX_XY_NEAR) != 0;
 	}
 
 	protected double horizontalDistanceTo(double latRads, double lonRads) {
 		if (estimatedState == null)
 			return Double.MAX_VALUE;
 		double[] pos = WGS84Utilities.toLatLonDepth(estimatedState);
-		return WGS84Utilities.distance(pos[0], pos[1], latRads, lonRads);
+
+		return WGS84Utilities.distance(pos[0], pos[1], Math.toDegrees(latRads),
+				Math.toDegrees(lonRads));
 	}
-	
+
 	protected double verticalDistanceTo(double depth) {
 		if (estimatedState == null)
 			return Double.MAX_VALUE;
 		return Math.abs(estimatedState.getDepth() - depth);
 	}
-	
-	
+
 	protected boolean arrivedZ() {
-		return followRefState != null && (followRefState.getProximity() & FollowRefState.PROX_Z_NEAR) != 0;
+		return followRefState != null
+				&& (followRefState.getProximity() & FollowRefState.PROX_Z_NEAR) != 0;
 	}
 
 	protected boolean arrived() {
@@ -92,18 +95,18 @@ public abstract class WaypointController extends ImcAgent {
 	protected Reference waypoint(double latRadians, double lonRadians,
 			double depth, double speed) {
 		return new Reference()
-		.setSpeed(
-				new DesiredSpeed().setSpeedUnits(SPEED_UNITS.METERS_PS)
-				.setValue(speed))
+				.setSpeed(
+						new DesiredSpeed().setSpeedUnits(SPEED_UNITS.METERS_PS)
+								.setValue(speed))
 				.setZ(new DesiredZ().setZUnits(Z_UNITS.DEPTH).setValue(depth))
 				.setLat(latRadians).setLon(lonRadians).setRadius(0);
 	}
-	
+
 	private PlanControl createStartRequest() {
 
 		FollowReference fref = new FollowReference()
-		.setControlEnt((short) getEntityId()).setControlSrc(getSrcId())
-		.setTimeout(timeout).setLoiterRadius(10);
+				.setControlEnt((short) getEntityId()).setControlSrc(getSrcId())
+				.setTimeout(timeout).setLoiterRadius(10);
 
 		return new PlanControl().setType(TYPE.REQUEST).setOp(OP.START)
 				.setPlanId(ctrl_id).setRequestId(0).setArg(fref).setFlags(0);
@@ -118,8 +121,7 @@ public abstract class WaypointController extends ImcAgent {
 		}
 		if (planControlState == null || followRefState == null) {
 			currentState = STATE.Connecting;
-		}
-		else {
+		} else {
 
 			if (planControlState.getPlanId().equals(ctrl_id)
 					&& followRefState.getControlSrc() == getSrcId()
@@ -130,15 +132,17 @@ public abstract class WaypointController extends ImcAgent {
 
 		switch (currentState) {
 		case Connecting:
-			if (planControlState != null && planControlState.getState() == PlanControlState.STATE.READY)
+			if (planControlState != null
+					&& planControlState.getState() == PlanControlState.STATE.READY)
 				send(vehicle, createStartRequest());
 			break;
 		case Controlling:
-			if (planControlState.getState() != PlanControlState.STATE.EXECUTING || !planControlState.getPlanId().equals(ctrl_id)) {
+			if (planControlState.getState() != PlanControlState.STATE.EXECUTING
+					|| !planControlState.getPlanId().equals(ctrl_id)) {
 				currentState = STATE.Connecting;
 				break;
 			}
-				
+
 			Reference wpt = guide();
 			if (wpt == null || (wpt.getFlags() & Reference.FLAG_MANDONE) != 0) {
 				currentState = STATE.Finished;
@@ -163,7 +167,7 @@ public abstract class WaypointController extends ImcAgent {
 				.setFlags(0).setRequestId(0).setType(TYPE.REQUEST);
 		send(vehicle, pc);
 	}
-	
+
 	public boolean isControlling() {
 		return currentState == STATE.Controlling;
 	}

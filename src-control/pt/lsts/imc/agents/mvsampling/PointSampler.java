@@ -51,9 +51,8 @@ public class PointSampler extends WaypointController {
 						sampleLon, "depth", sampleDepth);
 			default:
 				break;
-			}			
+			}
 		}
-
 	}
 
 	@Periodic(millisBetweenUpdates = 2500)
@@ -68,24 +67,23 @@ public class PointSampler extends WaypointController {
 
 	@EventHandler("Target")
 	public void receiveTarget(Map<String, ?> data) {
-		if (vehicle.equals(data.get("vehicle"))) {
-			this.targetLat = Double.parseDouble("" + data.get("lat"));
-			this.targetLon = Double.parseDouble("" + data.get("lon"));
-			this.targetDepth = Double.parseDouble("" + data.get("depth"));
+		this.targetLat = Double.parseDouble("" + data.get("lat"));
+		this.targetLon = Double.parseDouble("" + data.get("lon"));
+		this.targetDepth = Double.parseDouble("" + data.get("depth"));
 
-			// 	sample is now indeterminate
-			sample = sampleDepth = sampleLat = sampleLon = -1;
+		// 	sample is now indeterminate
+		sample = sampleDepth = sampleLat = sampleLon = -1;
 
-			state = FSM_STATE.GOING;
-			send(vehicle, guide());
-		}
+		System.out.println("Received target... now going there.");
+		
+		state = FSM_STATE.GOING;
+		send(vehicle, guide());
 	}
 
 	@Consume
 	public void onState(EstimatedState state) {
 		if (state.getSourceName().equals(vehicle)) {
-			this.lastState = state;
-			
+			this.lastState = state;			
 		}
 	}
 
@@ -101,16 +99,17 @@ public class PointSampler extends WaypointController {
 			}						
 			break;
 		case GOING:
+			System.out.println(arrivedZ()+" , "+horizontalDistanceTo(targetLat, targetLon));
 			if (arrivedZ() && horizontalDistanceTo(targetLat, targetLon) < 10) {
 				double[] pos = WGS84Utilities.toLatLonDepth(lastState);
 				sampleLat = Math.toRadians(pos[0]);
 				sampleLon = Math.toRadians(pos[1]);
 				sampleDepth = lastState.getDepth();
 				sample = lastState.getAlt();
-				state = FSM_STATE.DONE;
 				targetLat = Math.toRadians(pos[0]);
 				targetLon = Math.toRadians(pos[1]);
 				targetDepth = 0;
+				state = FSM_STATE.DONE;
 			}
 			break;
 		default:
