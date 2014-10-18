@@ -8,11 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import pt.lsts.imc.Announce;
 import pt.lsts.imc.Event;
 import pt.lsts.imc.agents.FSMAgent;
 import pt.lsts.imc.annotations.Agent;
-import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.EventHandler;
 import pt.lsts.imc.annotations.InitialState;
 import pt.lsts.imc.annotations.State;

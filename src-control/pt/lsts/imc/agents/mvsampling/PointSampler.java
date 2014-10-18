@@ -53,6 +53,7 @@ public class PointSampler extends WaypointController {
 					state = FSM_STATE.READY;
 				}
 				catch (Exception e) {
+					war("Couldn't send sample to master. Will retry in a bit...");
 				}
 				
 			default:
