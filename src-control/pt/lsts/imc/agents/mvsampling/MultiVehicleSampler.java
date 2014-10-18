@@ -8,9 +8,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import pt.lsts.imc.Announce;
 import pt.lsts.imc.Event;
 import pt.lsts.imc.agents.FSMAgent;
 import pt.lsts.imc.annotations.Agent;
+import pt.lsts.imc.annotations.Consume;
 import pt.lsts.imc.annotations.EventHandler;
 import pt.lsts.imc.annotations.InitialState;
 import pt.lsts.imc.annotations.State;
@@ -32,10 +34,11 @@ public class MultiVehicleSampler extends FSMAgent {
 	private String myself = null;
 	private LinkedHashMap<String, Event> samples = new LinkedHashMap<String, Event>();
 	double myLat, myLon;
-
+	
 	@EventHandler("Ready")
 	public void samplerReady(Event msg) {
 
+		System.out.println("Sampler ready in "+msg.getSourceName());
 		if (msg.getSourceName().startsWith("unknown")
 				|| slaves.contains(msg.getSourceName()))
 			return;

@@ -6,6 +6,7 @@
 [pt.lsts.imc.agents.net.ImcProtocol]
 	bind_port = 8001
 	local_name = sampler-1
+	autoconnect = lauv-noptilus-1|sampler.*
 
 [pt.lsts.imc.agents.mvsampling.PointSampler]
 	speed = 1.2

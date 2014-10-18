@@ -25,6 +25,9 @@ public class ImcProtocol extends ImcAgent {
 
 	@Property
 	int bind_port = 8448;
+	
+	@Property
+	String autoconnect = ".*";
 
 	private IMCProtocol proto;
 
@@ -34,6 +37,7 @@ public class ImcProtocol extends ImcAgent {
 	public void init() {
 		super.init();
 		proto = new IMCProtocol(local_name, bind_port);
+		proto.setAutoConnect(autoconnect);
 		AgentContext.instance().setUid(proto.getLocalId());
 		proto.addMessageListener(
 				new MessageListener<MessageInfo, IMCMessage>() {
@@ -59,28 +63,35 @@ public class ImcProtocol extends ImcAgent {
 
 	@Consume
 	void dispatch(IMCMessage msg) {
-		
+
 		boolean reliably = msg.getInteger("__reliable") != 0;
-		
+
 		if (reliably) {
-			System.out.println("[IMCProtocol] Send message of type "+msg.getAbbrev()+" reliably to "+msg.getString("__dst")+" in less than "+msg.getInteger("__timeout")+" milliseconds.");
+			System.out.println("[IMCProtocol] Send message of type "
+					+ msg.getAbbrev() + " reliably to "
+					+ msg.getString("__dst") + " in less than "
+					+ msg.getInteger("__timeout") + " milliseconds.");
 			try {
-				proto.sendReliably(msg.getString("__dst"), msg, msg.getInteger("__timeout"));
+				proto.sendReliably(msg.getString("__dst"), msg,
+						msg.getInteger("__timeout"));
 				getSender().tell(new DeliveryResult(msg, null), self());
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				getSender().tell(new DeliveryResult(msg, e), self());
 			}
 			return;
 		}
-		
+
 		if (msg.getDst() != 0 && msg.getDst() != 65535) {
 			String name = IMCDefinition.getInstance().getResolver()
 					.resolve(msg.getDst());
 			proto.sendMessage(name, msg);
 		} else {
 			for (Entry<String, Announce> ann : lastAnnounces.entrySet()) {
+
+				if (ann.getValue().getSrc() == getSrcId())
+					continue;
+
 				// send message to all peers (the ones that announced themselves
 				// recently)
 				if (System.currentTimeMillis()

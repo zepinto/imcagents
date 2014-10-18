@@ -58,38 +58,39 @@ public class ImcAgent extends UntypedActor {
 				.getSuperclass()) {
 			methods.addAll(Arrays.asList(cl.getMethods()));
 			methods.addAll(Arrays.asList(cl.getDeclaredMethods()));
+		}
+		for (Method m : methods) {
 
-			for (Method m : methods) {
-				Consume c = m.getAnnotation(Consume.class);
-				if (c == null)
-					continue;
-				Class<?>[] params = m.getParameterTypes();
-				if (params.length != 1)
-					continue;
+			Consume c = m.getAnnotation(Consume.class);
+			if (c == null)
+				continue;
+			System.out.println("Inspecting "+m);
+			Class<?>[] params = m.getParameterTypes();
+			if (params.length != 1)
+				continue;
 
-				if (!messageHandlers.containsKey(params[0]))
-					messageHandlers.put(params[0], new ArrayList<Method>());
+			if (!messageHandlers.containsKey(params[0]))
+				messageHandlers.put(params[0], new ArrayList<Method>());
 
-				m.setAccessible(true);
-				messageHandlers.get(params[0]).add(m);
-			}
+			m.setAccessible(true);
+			messageHandlers.get(params[0]).add(m);
+		}
 
-			for (Method m : methods) {
-				EventHandler h = m.getAnnotation(EventHandler.class);
-				if (h == null)
-					continue;
-				String event = h.value();
+		for (Method m : methods) {
+			EventHandler h = m.getAnnotation(EventHandler.class);
+			if (h == null)
+				continue;
+			String event = h.value();
 
-				Class<?>[] params = m.getParameterTypes();
-				if (params.length > 1)
-					continue;
+			Class<?>[] params = m.getParameterTypes();
+			if (params.length > 1)
+				continue;
 
-				if (!eventHandlers.containsKey(event))
-					eventHandlers.put(event, new ArrayList<Method>());
+			if (!eventHandlers.containsKey(event))
+				eventHandlers.put(event, new ArrayList<Method>());
 
-				m.setAccessible(true);
-				eventHandlers.get(event).add(m);
-			}
+			m.setAccessible(true);
+			eventHandlers.get(event).add(m);
 		}
 	}
 
@@ -155,7 +156,7 @@ public class ImcAgent extends UntypedActor {
 		List<ActorRef> imcAgents = AgentContext.instance().actorsOfClass(ImcProtocol.class);
 		if (imcAgents == null || imcAgents.isEmpty())
 			throw new Exception("No agent is capable of delivering the message");
-		
+
 		ActorRef ref = imcAgents.get(0);
 		Future<Object> result = Patterns.ask(ref, m, timeoutMillis);
 		DeliveryResult r = (DeliveryResult) Await.result(result,
@@ -213,7 +214,7 @@ public class ImcAgent extends UntypedActor {
 			sendEvent(topic);
 		}
 	}
-	
+
 	public void sendEventReliably(String topic, String destination, long timeoutMillis, Object... data) throws Exception {
 		LinkedHashMap<String, Object> map = new LinkedHashMap<>();
 		if (data != null) {
@@ -311,7 +312,7 @@ public class ImcAgent extends UntypedActor {
 	public int getSrcId() {
 		return AgentContext.instance().getUid();
 	}
-	
+
 	@Override
 	public final void onReceive(Object msg) throws Exception {
 		// First message sent to each agent its their properties
@@ -364,7 +365,7 @@ public class ImcAgent extends UntypedActor {
 					for (Method m : messageHandlers.get(clazz)) {
 						m.invoke(this, msg);	
 					}					
-					
+
 					return;
 				}
 				clazz = clazz.getSuperclass();
@@ -381,7 +382,7 @@ public class ImcAgent extends UntypedActor {
 		// If there is no handler for this type of message, signal that back
 		unhandled(msg);
 	}
-	
+
 	private void log(TYPE type, String text) {
 		send(new LogBookEntry()
 		.setContext(getClass().getSimpleName())
@@ -389,23 +390,23 @@ public class ImcAgent extends UntypedActor {
 		.setType(type)
 		.setText(text));
 	}
-	
+
 	public void inf(String text) {
 		log(TYPE.INFO, text);
 	}
-	
+
 	public void war(String text) {
 		log(TYPE.WARNING, text);
 	}
-	
+
 	public void debug(String text) {
 		log(TYPE.DEBUG, text);
 	}
-	
+
 	public void err(String text) {
 		log(TYPE.ERROR, text);
 	}
-	
+
 	public void critical(String text) {
 		log(TYPE.CRITICAL, text);
 	}
