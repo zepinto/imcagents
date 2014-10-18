@@ -1,5 +1,6 @@
 package pt.lsts.imc.agents;
 
+import info.zepinto.props.Property;
 import info.zepinto.props.PropertyUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -44,6 +45,9 @@ import akka.pattern.Patterns;
 @Agent(name="IMCAgent", publishes=LogBookEntry.class)
 public class ImcAgent extends UntypedActor {
 
+	@Property 
+	String name = getClass().getSimpleName();
+	
 	private ActorRef bus;
 	private LinkedHashMap<Class<?>, List<Method>> messageHandlers = new LinkedHashMap<>();
 	private LinkedHashMap<String, List<Method>> eventHandlers = new LinkedHashMap<>();
@@ -93,6 +97,14 @@ public class ImcAgent extends UntypedActor {
 			eventHandlers.get(event).add(m);
 		}
 	}
+	
+	public String getAgentName() {
+		return name;
+	}
+	
+	public void setAgentName(String name) {
+		this.name = name;
+	}
 
 	/**
 	 * Send a message to a known destination
@@ -132,7 +144,7 @@ public class ImcAgent extends UntypedActor {
 	 */
 	public void send(IMCMessage m) {
 		if (AgentContext.instance().getUid() == -1) {
-			System.err.println("Not yet connected.");
+			postInternally(m);
 			return;
 		}
 		m.setTimestampMillis(AgentContext.instance().getTime());
@@ -144,8 +156,7 @@ public class ImcAgent extends UntypedActor {
 
 	public void sendReliably(String destination, IMCMessage m, long timeoutMillis) throws Exception {
 		if (AgentContext.instance().getUid() == -1) {
-			System.err.println("Not yet connected.");
-			return;
+			throw new Exception("Not connected yet");
 		}
 		m.setTimestampMillis(AgentContext.instance().getTime());
 		m.setSrc(AgentContext.instance().getUid());
@@ -256,7 +267,15 @@ public class ImcAgent extends UntypedActor {
 	protected void terminate() {
 		context().stop(getSelf());
 	}
-
+	
+	public pt.lsts.imc.Agent serializeToImc() {
+		pt.lsts.imc.Agent agent = new pt.lsts.imc.Agent();
+		agent.setAgentClass(getClass().getName());
+		agent.setAgentName(getAgentName());
+		agent.setAgentState(PropertyUtils.getProperties(this, false));
+		return agent;
+	}
+		
 	/**
 	 * This method serializes the Agent behavior (class definition) and state
 	 * (fields marked with {@link Periodic}) to a byte array.
@@ -266,7 +285,7 @@ public class ImcAgent extends UntypedActor {
 	 *             In case it is not possible to access the file system to load
 	 *             the agent behavior.
 	 */
-	public byte[] serializeAgent() throws Exception {
+	public byte[] serializeAgentFull() throws Exception {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ZipOutputStream zipOut = new ZipOutputStream(baos);
 		zipOut.setMethod(ZipOutputStream.DEFLATED);
@@ -319,7 +338,6 @@ public class ImcAgent extends UntypedActor {
 		if (msg instanceof Properties) {
 			PropertyUtils.setProperties(this, ((Properties) msg), false);
 			bus = getSender();
-			init();
 			return;
 		} else if (msg instanceof PeriodicCall) {
 			PeriodicCall call = (PeriodicCall) msg;
@@ -333,10 +351,17 @@ public class ImcAgent extends UntypedActor {
 			}
 			return;
 		}
+		else if ("init".equals(msg)) {
+			init();
+			return;
+		}
 		// A "stop" message is sent to each agent right before terminating
 		else if ("stop".equals(msg)) {
 			stop();
 			return;
+		}
+		else if ("state".equals(msg)) {
+			getSender().tell(serializeToImc(), getSelf());
 		}
 
 		if (msg instanceof Event) {

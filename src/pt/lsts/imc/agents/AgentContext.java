@@ -2,6 +2,7 @@ package pt.lsts.imc.agents;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,7 +37,7 @@ public class AgentContext {
 	private int uid = -1;
 
 	private LinkedHashMap<Class<?>, List<ActorRef>> actorsByClass = new LinkedHashMap<Class<?>, List<ActorRef>>();
-	
+
 	private ActorRef bus;
 	private ActorSystem system;
 
@@ -97,6 +98,8 @@ public class AgentContext {
 		this.system = ActorSystem.create("IMCAgents");
 		this.bus = system.actorOf(Props.create(MessageBus.class));
 
+		Vector<ActorRef> actors = new Vector<ActorRef>();
+
 		for (Ini.Section section : ini.values()) {
 			String name = section.getName();
 			Properties props = new Properties();
@@ -110,9 +113,12 @@ public class AgentContext {
 					c = Class.forName("pt.lsts.imc.agents." + name);
 				}
 
-				bootstrap(c, props);
+				actors.add(bootstrap(c, props));
 			}
 		}
+
+		for (ActorRef actor : actors)
+			actor.tell("init", bus);
 	}
 
 	/**
@@ -130,15 +136,15 @@ public class AgentContext {
 
 		if (!actorsByClass.containsKey(c))
 			actorsByClass.put(c, new ArrayList<ActorRef>());
-		
+
 		actorsByClass.get(c).add(ref);
-		
+
 		// Create an interface for the actor (using the annotations)
 		AgentInterface chan = new AgentInterface(c);
 
 		bus.tell(chan, ref);
 		ref.tell(properties, bus);
-		
+
 		Map<String, Integer> periodicCalls = chan.periodicCalls();
 		for (Entry<String, Integer> entry : periodicCalls.entrySet()) {
 			PeriodicCall call = new PeriodicCall(ref, entry.getKey(),
@@ -151,7 +157,7 @@ public class AgentContext {
 		}
 		return ref;
 	}
-	
+
 	public List<ActorRef> actorsOfClass(Class<?> c) {
 		if (actorsByClass.containsKey(c))
 			return Collections.unmodifiableList(actorsByClass.get(c));
@@ -201,10 +207,18 @@ public class AgentContext {
 	}
 
 	/**
-	 * @param uid the uid to set
+	 * @param uid
+	 *            the uid to set
 	 */
 	public void setUid(int uid) {
 		this.uid = uid;
+	}
+
+	/**
+	 * @return the actors
+	 */
+	public Collection<ActorRef> getActors() {
+		return Collections.unmodifiableCollection(actors);
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -212,7 +226,7 @@ public class AgentContext {
 			System.err.println("Usage: java -jar agents.jar <config>");
 			System.exit(1);
 		}
-		
-		new AgentContext(new File(args[0]));		
+
+		new AgentContext(new File(args[0]));
 	}
 }

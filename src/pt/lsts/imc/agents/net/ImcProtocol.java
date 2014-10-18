@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import pt.lsts.imc.Announce;
+import pt.lsts.imc.AnnounceService;
 import pt.lsts.imc.IMCDefinition;
 import pt.lsts.imc.IMCMessage;
 import pt.lsts.imc.agents.AgentContext;
@@ -62,8 +63,16 @@ public class ImcProtocol extends ImcAgent {
 	}
 
 	@Consume
-	void dispatch(IMCMessage msg) {
+	private void on(AnnounceService serv) {
+		if (serv.getSrc() == 0 || serv.getSrc() == getSrcId()) {
+			proto.addService(serv.getService());
+			war("Added service: "+serv.getService());
+		}
+		
+	}
 
+	@Consume
+	void dispatch(IMCMessage msg) {
 		boolean reliably = msg.getInteger("__reliable") != 0;
 
 		if (reliably) {

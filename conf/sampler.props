@@ -3,6 +3,8 @@
 
 [pt.lsts.imc.agents.sim.LogBookDisplay]
 
+[pt.lsts.imc.agents.net.AgentMigration]
+
 [pt.lsts.imc.agents.net.ImcProtocol]
 	bind_port = 8001
 	local_name = sampler-1
@@ -14,4 +16,4 @@
 
 [pt.lsts.imc.agents.mvsampling.MultiVehicleSampler]
 	requiredSamplers = 3
-	
+

@@ -1,0 +1,13 @@
+[pt.lsts.imc.agents.sim.Logger]
+	print = false
+
+[pt.lsts.imc.agents.sim.LogBookDisplay]
+
+[pt.lsts.imc.agents.net.AgentMigration]
+
+[pt.lsts.imc.agents.net.ImcProtocol]
+	bind_port = 8001
+	local_name = mig1
+
+[pt.lsts.imc.agents.tests.RemoteInstantiationExample]
+	request_id = 50

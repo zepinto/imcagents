@@ -1,0 +1,10 @@
+[pt.lsts.imc.agents.sim.Logger]
+	print = false
+
+[pt.lsts.imc.agents.sim.LogBookDisplay]
+
+[pt.lsts.imc.agents.net.AgentMigration]
+
+[pt.lsts.imc.agents.net.ImcProtocol]
+	bind_port = 8002
+	local_name = mig2
