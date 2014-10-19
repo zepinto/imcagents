@@ -65,8 +65,6 @@ public class MultiVehicleSampler extends FSMAgent {
 	@InitialState
 	public void discoverSamplers() {
 		
-		serializeToImc();
-		
 		if (slaves.size() >= requiredSamplers && myself != null) {
 			war("Minimum number of samplers met. Will now send targets.");
 			transition("distributeTargets", "SamplersFound");
