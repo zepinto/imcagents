@@ -68,7 +68,6 @@ public class ImcAgent extends UntypedActor {
 			Consume c = m.getAnnotation(Consume.class);
 			if (c == null)
 				continue;
-			System.out.println("Inspecting "+m);
 			Class<?>[] params = m.getParameterTypes();
 			if (params.length != 1)
 				continue;

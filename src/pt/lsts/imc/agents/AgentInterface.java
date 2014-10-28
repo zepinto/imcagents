@@ -77,7 +77,8 @@ public class AgentInterface {
 				}
 			}
 		}
-		System.out.println(agentClass.getSimpleName()+" listens to "+messagesToListen+" and produces "+messagesProduced);
+		//TODO export interface to dot graph
+		//System.out.println(agentClass.getSimpleName()+" listens to "+messagesToListen+" and produces "+messagesProduced);
 	}
 
 	/**
