@@ -23,7 +23,7 @@ public class MultiVehicleSampler extends FSMAgent {
 	private int requiredSamplers = 3;
 
 	@Property
-	private double cellWidth = 50;
+	private double cellWidth = 25;
 
 	@Property
 	private double surveyDepth = 1;
@@ -73,6 +73,7 @@ public class MultiVehicleSampler extends FSMAgent {
 
 	private List<Point2D> generateNextWaypoints() {
 		double angle = (Math.PI * 2) / requiredSamplers;
+		double startAngle = (Math.PI / 2) * Math.random();
 		ArrayList<Point2D> points = new ArrayList<Point2D>();
 		double centerLat = myLat, centerLon = myLon;
 
@@ -96,8 +97,8 @@ public class MultiVehicleSampler extends FSMAgent {
 				+ ")");
 
 		for (int i = 0; i < requiredSamplers; i++) {
-			double offsetX = Math.cos(angle * i) * cellWidth;
-			double offsetY = Math.sin(angle * i) * cellWidth;
+			double offsetX = Math.cos(angle * i + startAngle) * cellWidth;
+			double offsetY = Math.sin(angle * i + startAngle) * cellWidth;
 
 			double[] pos = WGS84Utilities.WGS84displace(centerLat, centerLon,
 					surveyDepth, offsetX, offsetY, 0);

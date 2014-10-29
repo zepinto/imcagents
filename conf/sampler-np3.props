@@ -3,9 +3,9 @@
 
 [pt.lsts.imc.agents.net.ImcProtocol]
 	bind_port = 8003
-	local_name = sampler-3
+	local_name = sampler-np3
 	autoconnect = lauv-noptilus-3|sampler.*
 
 [pt.lsts.imc.agents.mvsampling.PointSampler]
-	speed = 1.2
+	speed = 1.0
 	vehicle = lauv-noptilus-3

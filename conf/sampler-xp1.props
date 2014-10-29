@@ -7,12 +7,12 @@
 
 [pt.lsts.imc.agents.net.ImcProtocol]
 	bind_port = 8001
-	local_name = sampler-1
-	autoconnect = lauv-noptilus-1|sampler.*
+	local_name = sampler-xp1
+	autoconnect = lauv-xplore-1|sampler.*
 
 [pt.lsts.imc.agents.mvsampling.PointSampler]
-	speed = 1.2
-	vehicle = lauv-noptilus-1
+	speed = 1.0
+	vehicle = lauv-xplore-1
 
 [pt.lsts.imc.agents.mvsampling.MultiVehicleSampler]
 	requiredSamplers = 3
