@@ -17,10 +17,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import pt.lsts.imc.AgentCommand;
 import pt.lsts.imc.Event;
 import pt.lsts.imc.IMCDefinition;
 import pt.lsts.imc.IMCMessage;
 import pt.lsts.imc.LogBookEntry;
+import pt.lsts.imc.AgentCommand.CMD;
 import pt.lsts.imc.LogBookEntry.TYPE;
 import pt.lsts.imc.agents.net.DeliveryResult;
 import pt.lsts.imc.agents.net.ImcProtocol;
@@ -49,7 +51,7 @@ public class ImcAgent extends UntypedActor {
 	String name = getClass().getSimpleName();
 	
 	private ActorRef bus;
-	private LinkedHashMap<Class<?>, List<Method>> messageHandlers = new LinkedHashMap<>();
+	private LinkedHashMap<Class<?>, List<Method>> messageHandlers = new LinkedHashMap<>(); 
 	private LinkedHashMap<String, List<Method>> eventHandlers = new LinkedHashMap<>();
 
 	private static int reliable_id = 1;
@@ -171,8 +173,11 @@ public class ImcAgent extends UntypedActor {
 		Future<Object> result = Patterns.ask(ref, m, timeoutMillis);
 		DeliveryResult r = (DeliveryResult) Await.result(result,
 				Duration.create(timeoutMillis*2, TimeUnit.MILLISECONDS));
+		
 		if (!r.isSuccess())
 			r.getException();
+		
+		postInternally(m);
 	}
 
 	/**
@@ -413,6 +418,18 @@ public class ImcAgent extends UntypedActor {
 		.setHtime(AgentContext.instance().getTime() / 1000.0)
 		.setType(type)
 		.setText(text));
+	}
+	
+	static int request_id = 0;
+	public void createAgent(String host, Class<? extends ImcAgent> agentClass,
+			Map<String, Object> properties, long timeoutMillis)
+			throws Exception {
+		
+		AgentCommand cmd = new AgentCommand();
+		cmd.setCmd(CMD.INSTANTIATION_REQUEST);
+		cmd.setArgs(Arrays.asList(serializeToImc()));
+		cmd.setRequestId(request_id++);
+		sendReliably(host, cmd, timeoutMillis);
 	}
 
 	public void inf(String text) {

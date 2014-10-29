@@ -54,4 +54,19 @@
 		    </manifest>
 		</jar>
 	</target>
+	
+	<target name="package" depends="jar">
+		<deltree dir="imcagents"/>
+		<mkdir dir="imcagents"/>
+		<copy todir="imcagents">
+			<fileset dir="." includes="conf/*"/>
+			<fileset file="agents.jar"/>
+		</copy>
+		<get dest="imcagents/ejre_bbb.tar.gz" src="http://zpserver.info/lsts/jvm/ejre-7u71-fcs-b14-linux-arm-vfp-sflt-server_headless-26_sep_2014.tar.gz"/>
+		<untar compression="gzip" src="imcagents/ejre_bbb.tar.gz" dest="imcagents"/>
+		<delete file="imcagents/ejre_bbb.tar.gz"/>
+		<tar destfile="imcagents.tar" basedir="imcagents">
+		</tar>
+		<bzip2 src="imcagents.tar" destfile="imcagents.tbz2"/>		
+	</target >
 </project>
