@@ -19,6 +19,9 @@ public class PointSampler extends WaypointController {
 
 	@Property
 	double speed = 1.2;
+	
+	@Property
+	boolean simulation = true;
 
 	private double targetLat = Double.NaN, targetLon = Double.NaN,
 			targetDepth = Double.NaN;
@@ -47,6 +50,12 @@ public class PointSampler extends WaypointController {
 						Math.toRadians(pos[0]), "lon", Math.toRadians(pos[1]));
 				break;
 			case SEND_SAMPLE:
+				
+				if (simulation && (lastState == null || lastState.getDepth() > 0.33)) {
+					// only send at surface after some time
+					return;
+				}
+				
 				try {
 					sendEventReliably("Sample", myMaster, 500, "name", vehicle, "value", sample, "lat", sampleLat, "lon",
 							sampleLon, "depth", sampleDepth);

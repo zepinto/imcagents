@@ -23,10 +23,10 @@ public class MultiVehicleSampler extends FSMAgent {
 	private int requiredSamplers = 3;
 
 	@Property
-	private double cellWidth = 25;
+	private double cellWidth = 50;
 
 	@Property
-	private double surveyDepth = 1;
+	private double surveyDepth = 2;
 
 	private ArrayList<String> slaves = new ArrayList<String>();
 	private String myself = null;
@@ -122,7 +122,7 @@ public class MultiVehicleSampler extends FSMAgent {
 			try {
 				sendEventReliably("Target", slaves.get(i), 300, "lat", wpts
 						.get(i).getX(), "lon", wpts.get(i).getY(), "depth",
-						surveyDepth + i);
+						surveyDepth);
 				i++;
 			} catch (Exception e) {
 				e.printStackTrace();
